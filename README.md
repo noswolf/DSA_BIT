@@ -12,6 +12,7 @@ This repo consists of teaching materials (lectures and code examples) for BIT, I
 |Week 05| N/A | N/A | N/A |
 |Week 06| N/A | N/A | N/A |
 |Week 07| N/A | N/A | N/A |
+|Week 08| Mid-term |
 |Week 09| N/A | N/A | N/A |
 |Week 10| N/A | N/A | N/A |
 |Week 11| N/A | N/A | N/A |
