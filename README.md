@@ -5,7 +5,7 @@ This repo consists of teaching materials (lectures and code examples) for BIT, I
 ## Contents
 |Week|Lecture Slides|Code Examples|Homework|
 |---|---|---|---|
-|Week 01| [2 Pages](https://github.com/noswolf/DSA_BIT/blob/master/Week1/BDSA_Week1_2pages.pdf), [4 Pages](https://github.com/noswolf/DSA_BIT/blob/master/Week1/BDSA_Week1_4pages.pdf)   |[Notebook](https://nbviewer.jupyter.org/github/noswolf/DSA_BIT/blob/master/Week1/DSA_Week1.ipynb), [Colab](https://colab.research.google.com/github/noswolf/DSA_BIT/blob/master/Week1/DSA_Week1.ipynb)| - |
+|Week 01| [2 Pages](https://github.com/noswolf/DSA_BIT/blob/master/Week1/BDSA_Week1_2pages.pdf), [4 Pages](https://github.com/noswolf/DSA_BIT/blob/master/Week1/BDSA_Week1_4pages.pdf) |[Notebook](https://nbviewer.jupyter.org/github/noswolf/DSA_BIT/blob/master/Week1/DSA_Week1.ipynb), [Colab](https://colab.research.google.com/github/noswolf/DSA_BIT/blob/master/Week1/DSA_Week1.ipynb) <br> [Solution Exercise](https://nbviewer.jupyter.org/github/noswolf/DSA_BIT/blob/master/Week1/DSA_Week1_Exercise_Solution.ipynb)| - |
 |Week 02| N/A | N/A | N/A |
 |Week 03| N/A | N/A | N/A |
 |Week 04| N/A | N/A | N/A |
