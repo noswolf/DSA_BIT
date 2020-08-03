@@ -2,6 +2,8 @@
 
 This repo consists of teaching materials (lectures and code examples) for BIT, IT KMITL.
 
+[Course Outline](https://github.com/noswolf/DSA_BIT/blob/master/Course%20Outline%20BDSA%2001_2020.pdf)
+
 ## Contents
 |Week|Lecture Slides|Code Examples|Homework|
 |---|---|---|---|
