@@ -6,7 +6,7 @@ This repo consists of teaching materials (lectures and code examples) for BIT, I
 [Course Outline](https://github.com/noswolf/DSA_BIT/blob/master/Course%20Outline%20BDSA%2001_2020.pdf)
 
 ## Group Presentation Assignment and Guideline
-[Group Assignment]()  
+[Group Assignment](https://github.com/noswolf/DSA_BIT/blob/master/Group%20Presentation/BDSA_Group_Assignment.pdf)  
 [Group Presentation Schedule]() - Available soon
 
 ## Contents
