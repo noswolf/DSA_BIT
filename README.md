@@ -7,7 +7,7 @@ This repo consists of teaching materials (lectures and code examples) for BIT, I
 
 ## Group Presentation Assignment and Guideline
 [Group Assignment]()  
-[Group Presentation Schedule]() - Avaialble soon
+[Group Presentation Schedule]() - Available soon
 
 ## Contents
 |Week|Lecture Slides|Code Examples|Individual Assignments|
