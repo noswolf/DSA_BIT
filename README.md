@@ -7,7 +7,7 @@ This repo consists of teaching materials (lectures and code examples) for BIT, I
 
 ## Group Presentation Assignment and Guideline
 [Group Assignment](https://github.com/noswolf/DSA_BIT/blob/master/Group%20Presentation/BDSA_Group_Assignment.pdf)  
-[Group Presentation Schedule](https://github.com/noswolf/DSA_BIT/blob/master/Group%20Presentation/BDSA_Group_Presentation_Schedule.pdf)
+[Group Presentation Schedule](https://github.com/noswolf/DSA_BIT/blob/master/Group%20Presentation/BDSA_Group_Presentation_Schedule_v2.pdf)
 
 ## Contents
 |Week|Lecture Slides|Code Examples|Individual Assignments|
