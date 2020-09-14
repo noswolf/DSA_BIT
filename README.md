@@ -20,7 +20,7 @@ This repo consists of teaching materials (lectures and code examples) for BIT, I
 |Week 06| 8/9/2020 | [2 Pages](https://github.com/noswolf/DSA_BIT/blob/master/Week6/BDSA_Week6_2pages.pdf), [4 Pages](https://github.com/noswolf/DSA_BIT/blob/master/Week6/BDSA_Week6_4pages.pdf) | [Notebook](https://nbviewer.jupyter.org/github/noswolf/DSA_BIT/blob/master/Week6/DSA_Week6.ipynb), [Colab](https://colab.research.google.com/github/noswolf/DSA_BIT/blob/master/Week6/DSA_Week6.ipynb) | #5 [PDF](https://github.com/noswolf/DSA_BIT/blob/master/Week6/BDSA_Assignment05.pdf), [Google Docs](https://drive.google.com/file/d/122245vk4asaRst6VcicSl8il6yBXkZjQ/view?usp=sharing) Due 15/9/2020 | Group 3, 4 |
 |Week 07| 15/9/2020 | [2 Pages](https://github.com/noswolf/DSA_BIT/blob/master/Week7/BDSA_Week7_2pages.pdf), [4 Pages](https://github.com/noswolf/DSA_BIT/blob/master/Week7/BDSA_Week7_4pages.pdf) | N/A | - | Group 5 |
 |Week 08| 22/9/2020 | Mid-term | |
-|Week 09| 29/9/2020 | N/A | N/A | N/A | |
+|Week 09| 29/9/2020 | [2 Pages](https://github.com/noswolf/DSA_BIT/blob/master/Week9/BDSA_Week9_2pages.pdf), [4 Pages](https://github.com/noswolf/DSA_BIT/blob/master/Week9/BDSA_Week9_4pages.pdf) | [Notebook](https://nbviewer.jupyter.org/github/noswolf/DSA_BIT/blob/master/Week9/DSA_Week9.ipynb), [Colab](https://colab.research.google.com/github/noswolf/DSA_BIT/blob/master/Week9/DSA_Week9.ipynb) | N/A | |
 |Week 10| 6/10/2020 | N/A | N/A | N/A | |
 |Week 11| 13/10/2020 | N/A | N/A | N/A | |
 |Week 12| 20/10/2020 | N/A | N/A | N/A | |
