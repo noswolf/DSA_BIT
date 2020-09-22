@@ -1,4 +1,4 @@
-# Basic Data Structures and Algorithms
+# Basic Data Structures and Algorithms - 2nd Year
 
 This repo consists of teaching materials (lectures and code examples) for BIT, IT KMITL.
 
