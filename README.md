@@ -5,7 +5,7 @@ This repo consists of teaching materials (lectures and code examples) for BIT, I
 ## Course Outlines
 |Week| Date | Lecture Slides|Code Examples|Individual Assignments|
 |---|---|---|---|---|
-|Week 01| 03/07/2023 | [Week1_Introduction](https://github.com/noswolf/DSA_BIT/blob/master/Week1/BDSA_Week1_2pages.pdf) |[Notebook](https://nbviewer.jupyter.org/github/noswolf/DSA_BIT/blob/master/Week1/DSA_Week1.ipynb), [Colab](https://colab.research.google.com/github/noswolf/DSA_BIT/blob/master/Week1/DSA_Week1.ipynb) | - |
+|Week 01| 03/07/2023 | [Week1_Introduction](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week1/DSAP_Week1_student.pdf)  |[Notebook](https://nbviewer.jupyter.org/github/noswolf/DSA_BIT/blob/master/Week1/DSA_Week1.ipynb), [Colab](https://colab.research.google.com/github/noswolf/DSA_BIT/blob/master/Week1/DSA_Week1.ipynb) | - |
 |Week 02| 10/07/2023 | | |  | |
 |Week 03| 17/07/2023 | | |  | |
 |Week 04| 24/07/2023 | | |  | |
