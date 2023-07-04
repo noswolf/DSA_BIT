@@ -5,7 +5,7 @@ This repo consists of teaching materials (lectures and code examples) for SIIE, 
 ## Course Outlines
 |Week| Date | Lecture Slides|Lab Sheet|
 |---|---|---|---|
-|Week 01| 04/07/2023 | [Week1_Introduction](https://github.com/noswolf/DSA_BIT/blob/DSA_23/Week1/DSA_Week1.pdf)  |[#1 Python Crash Course](https://github.com/noswolf/DSA_BIT/blob/DSA_23/Week1/DSA_Python_Crash_Course_stu.pdf)  |
+|Week 01| 04/07/2023 | [Week1_Introduction](https://github.com/noswolf/DSA_BIT/blob/DSA_23/Week1/DSA_Week1.pdf)  |[#1 Python Crash Course](https://github.com/noswolf/DSA_BIT/blob/DSA_23/Week1/DSA_Python_Crash_Course_stu.pdf), [Challenge](https://github.com/noswolf/DSA_BIT/blob/DSA_23/Week1/DSA_Lab-1-Challenge.ipynb)  |
 |Week 02| 11/07/2023 | | |  
 |Week 03| 18/07/2023 | | |  
 |Week 04| 25/07/2023 | No Class | No Lab |   
