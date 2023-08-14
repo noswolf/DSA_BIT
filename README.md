@@ -10,8 +10,8 @@ This repo consists of teaching materials (lectures and code examples) for BIT, I
 |Week 03| 17/07/2023 | [Week3_Arrays](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week3/DSAP_Week3_student.pdf) | [Examples#3](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week3/DSAP_Week3.ipynb) | [Assignment#3](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week3/DSAP_Assignment03.pdf) | 
 |Week 04| 24/07/2023 | No Class - Study via VDO <br> [Week4_Stacks](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week4/DSAP_Week4_student.pdf)| [Examples#4](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week4/DSAP_Week4.ipynb) | [Assignment#4](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week4/DSAP_Assignment04.pdf) | 
 |Week 05| 31/07/2023 | No Class - Study via VDO <br> [Week5_Queues](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week5/DSAP_Week5_student.pdf)| [Examples#5](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week5/DSAP_Week5.ipynb) | [Assignment#5](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week5/DSAP_Assignment05.pdf) | 
-|Week 06| 07/08/2023 | [Week6_Linked Lists_Part_1](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week6/DSAP_Week6_student.pdf) | [Examples#6](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week6/DSAP_Week6.ipynb) |  | 
-|Week 07| 14/08/2023 | No Class - Study via VDO | |  | 
+|Week 06| 07/08/2023 | [Week6_Linked_Lists_Part_1](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week6/DSAP_Week6_student.pdf) | [Examples#6](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week6/DSAP_Week6.ipynb) |  | 
+|Week 07| 14/08/2023 | No Class - Study via VDO <br> [Week7_Linked_Lists_Part_2](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week7/DSAP_Week7_student.pdf)| | [Assignment#6](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week7/DSAP_Assignment06.pdf) | 
 |Week 08| 21/08/2023 |  | 
 |Midterm| 28/08/2023 | | 
 |Week 09| 04/09/2023 | | |  | 
