@@ -14,9 +14,9 @@ This repo consists of teaching materials (lectures and code examples) for SIIE, 
 |Week 07| 15/08/2023 | [Week7_Linked_Lists_Part_2](https://github.com/noswolf/DSA_BIT/blob/DSA_23/Week7/DSA_Week7.pdf) | [#5](https://github.com/noswolf/DSA_BIT/blob/DSA_23/Week7/DSA_Lab_5_student.ipynb) |  
 |Week 08| 22/08/2023 | [Week8_Trees](https://github.com/noswolf/DSA_BIT/blob/DSA_23/Week8/DSA_Week8.pdf) | No Lab | 
 |Week 09| 29/08/2023 | Mid-term | |  
-|Week 10| 05/09/2023 | | |  
+|Week 10| 05/09/2023 | [Week9_Binary_Search_Trees](https://github.com/noswolf/DSA_BIT/blob/DSA_23/Week9/DSA_Week9.pdf)| |  
 |Week 11| 12/09/2023 | | |   
-|Week 12| 19/09/2023 | |  |  
+|Week 12| 19/09/2023 | No Class <br> |  No Lab |  
 |Week 13| 26/09/2023 | | |   
 |Week 14| 03/10/2023 | | |  
 |Week 15| 10/10/2023 | | |  
