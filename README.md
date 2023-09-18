@@ -16,7 +16,7 @@ This repo consists of teaching materials (lectures and code examples) for BIT, I
 |Midterm| 28/08/2023 | | 
 |Week 09| 04/09/2023 | [Week11_Searching](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week11/DSAP_Week11_student.pdf)| |  | 
 |Week 10| 11/09/2023 | [Week9_Trees](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week9/DSAP_Week9_student.pdf) | |  | 
-|Week 11| 18/09/2023 | [Week10_Search_Trees](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week10/DSA_Week10_student.pdf) |  | Assignment#7](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week10/DSAP_Assignment07.pdf)|
+|Week 11| 18/09/2023 | [Week10_Search_Trees](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week10/DSA_Week10_student.pdf) | [Examples#7](https://gist.github.com/noswolf/43f6208b5d666dbb743cb14e4fb8ae24) | [Assignment#7](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week10/DSAP_Assignment07.pdf)|
 |Week 12| 25/09/2023 | |  |  | 
 |Week 13| 02/10/2023 | | |  | 
 |Week 14| 09/10/2023 | | |  | 
