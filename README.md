@@ -18,6 +18,6 @@ This repo consists of teaching materials (lectures and code examples) for SIIE, 
 |Week 11| 12/09/2023 | [Week10_Searching](https://github.com/noswolf/DSA_BIT/blob/DSA_23/Week10/DSA_Week10.pdf) | #6 (Cont.) |   
 |Week 12| 19/09/2023 | No Class <br> []() |  No Lab |  
 |Week 13| 26/09/2023 | [Week12_Sorting](https://github.com/noswolf/DSA_BIT/blob/DSA_23/Week12/DSA_Week12.pdf) | [#7](https://github.com/noswolf/DSA_BIT/blob/DSA_23/Week10/DSA_Lab_7_student.ipynb) |   
-|Week 14| 03/10/2023 | | [#8](https://github.com/noswolf/DSA_BIT/blob/DSA_23/Week12/DSA_Lab_8_student.ipynb)|  
+|Week 14| 03/10/2023 | [Week13_Graphs](https://github.com/noswolf/DSA_BIT/blob/DSA_23/Week13/DSA_Week13.pdf) | [#8](https://github.com/noswolf/DSA_BIT/blob/DSA_23/Week12/DSA_Lab_8_student.ipynb)|  
 |Week 15| 10/10/2023 | | |  
-|Week 16| 17/10/2023 | | |  
+|Week 16| 17/10/2023 | [VDO Week 12.5: Recursion_and_Sorting](https://www.youtube.com/playlist?list=PLn4P4Ao3UayASXDTmVzxELp39Jute577O) | |  
