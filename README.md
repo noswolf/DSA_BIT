@@ -18,6 +18,7 @@ This repo consists of teaching materials (lectures and code examples) for BIT, I
 |Week 10| 11/09/2023 | [Week9_Trees](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week9/DSAP_Week9_student.pdf) | |  | 
 |Week 11| 18/09/2023 | [Week10_Search_Trees](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week10/DSAP_Week10_student.pdf) <br> [Week10.5_AVL_Trees](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week10/DSAP_Week10.5_student.pdf)| [Examples#7](https://gist.github.com/noswolf/43f6208b5d666dbb743cb14e4fb8ae24) | [Assignment#7](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week10/DSAP_Assignment07.pdf)|
 |Week 12| 25/09/2023 | No Class - Study via VDO <br> [Week12_Sorting](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week12/DSAP_Week12_student.pdf) |  |  | 
-|Week 13| 02/10/2023 | [Week13_Sorting (Cont.)](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week13/DSAP_Week13_student.pdf) | |  | 
+|Week 13| 02/10/2023 | [Week13_Sorting (Cont.)](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week13/DSAP_Week13_student.pdf) | [Examples#8](https://gist.github.com/noswolf/8331e7bfbe09d0353da533c55b72a39e)|  | 
 |Week 14| 09/10/2023 | [Week14_Graphs](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week14/DSAP_Week14_student.pdf) | | [Assignment#8](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week14/DSAP_Assignment08.pdf) <br> [Assignment#9](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week14/DSAP_Assignment09.pdf) | 
-|Week 15| 16/10/2023 | | |  | 
+|Week 15| 16/10/2023 | [Week15_Greedy_Algorithms](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week15/DSAP_Week15_student.pdf)| | [Assignment#10](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Week15/DSAP_Assignment10.pdf) | 
+|Final Exam| 07/11/2023 | [Exam Format and Example Questions](https://github.com/noswolf/DSA_BIT/blob/DSAP_23/Final_Exam_Example_Questions.pdf)| | | 
