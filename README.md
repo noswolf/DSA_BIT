@@ -6,7 +6,7 @@ This repo consists of teaching materials (lectures and code examples) for BIT, I
 |Week| Date | Lecture Slides|Code Examples|Individual Assignments|
 |---|---|---|---|---|
 |Week 01| 01/07/2024 | [Week1_Introduction](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week1/DSAP_Week1.pdf) <br> [Python Crash Course](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week1/DSAP_Python_Crash_Course_stu.pdf)  | | - |
-|Week 02| 08/07/2024 | | | | 
+|Week 02| 08/07/2024 | [Week2_Algorithm_Analysis](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week2/DSAP_Week2.pdf) | -  | [Week2_Assignment](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week2/DSA_Lab-2_student.ipynb) | 
 |Week 03| 15/07/2024 | | | | 
 |Week 04| 22/07/2024 | | | | 
 |Week 05| 29/07/2024 | | | | 
