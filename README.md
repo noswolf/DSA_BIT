@@ -8,7 +8,7 @@ This repo consists of teaching materials (lectures and code examples) for BIT, I
 |Week 01| 01/07/2024 | [Week1_Introduction](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week1/DSAP_Week1.pdf) <br> [Python Crash Course](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week1/DSAP_Python_Crash_Course_stu.pdf)  | | - |
 |Week 02| 08/07/2024 | [Week2_Algorithm_Analysis](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week2/DSAP_Week2.pdf) | -  | [Week2_Assignment](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week2/DSA_Lab-2_student.ipynb) | 
 |Week 03| 15/07/2024 | [Week3_Arrays](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week3/DSAP_Week3.pdf) | -  | [Week3_Assignment](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week3/DSA_Lab_3_student.ipynb) | | 
-|Week 04| 22/07/2024 | [Week4_Stacks](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week4/DSAP_Week4.pdf) | | | 
+|Week 04| 22/07/2024 | [Week4_Stacks](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week4/DSAP_Week4.pdf) | - | [Week4_Assignment](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week4/DSAP_Lab_4_student_2024.ipynb) | 
 |Week 05| 29/07/2024 | [Week5_Queues](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week5/DSAP_Week5.pdf) | | | 
 |Week 06| 05/08/2024 | | | | 
 |Week 07| 12/08/2024 | | | | 
