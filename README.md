@@ -12,7 +12,7 @@ This repo consists of teaching materials (lectures and code examples) for BIT, I
 |Week 05| 29/07/2024 | [Week5_Queues](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week5/DSAP_Week5.pdf) | | | 
 |Week 06| 05/08/2024 | [Week6_Singly_Linked_List](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week6/DSAP_Week6.pdf) | - | [Week6_Assignment](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week6/DSAP_Lab_5_student.ipynb) | 
 |Week 07| 12/08/2024 | [Week7_Circular_and_Doubly_Linked_List](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week7/DSAP_Week7.pdf) |- |[Week7_Assignment](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week7/DSAP_Lab_6_student.ipynb) | 
-|Week 08| 19/08/2024 | | | | 
+|Week 08| 19/08/2024 | [Week8_Searching](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week8/DSAP_Week8.pdf) | - | - | 
 |Midterm| 28/08/2024 | | | | 
 |Week 09| 02/09/2024 | | | | 
 |Week 10| 09/09/2024 | | | | 
