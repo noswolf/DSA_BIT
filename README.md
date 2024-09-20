@@ -17,7 +17,7 @@ This repo consists of teaching materials (lectures and code examples) for BIT, I
 |Week 09| 02/09/2024 | - | - | [Week9_Assignment](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week9/DSAP_Lab_7_student.ipynb) |
 |Week 10| 09/09/2024 | [Week10_Sorting](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week10/DSAP_Week10.pdf) | - | [Week10_Assignment](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week10/DSAP_Lab_8_student.ipynb) | 
 |Week 11| 16/09/2024 | [Week11_Recursion & Sorting](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week11/DSAP_Week11.pdf) | - | [Week11_Assignment](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week11/DSAP_Lab_8_student_recursion.ipynb) | 
-|Week 12| 23/09/2024 | | | |  
+|Week 12| 23/09/2024 | [Week12_Trees](https://github.com/noswolf/DSA_BIT/blob/DSAP_24/Week12/DSAP_Week12.pdf) | - | - |  
 |Week 13| 30/19/2024 | | | |  
 |Week 14| 07/10/2024 | | | | 
 |Week 15| 14/10/2024 | | | | 
