@@ -18,7 +18,7 @@ This repo consists of teaching materials (lectures and code examples) for SIIE, 
 |Week 10| 09/09/2024 | [Week10_Sorting](https://github.com/noswolf/DSA_BIT/blob/DSA_24/Week10/DSA_Week10.pdf) | [#8 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_24/Week10/DSA_Lab_8_student.ipynb)  |  
 |Week 11| 16/09/2024 | [Week11_Recursion_and_Sorting](https://github.com/noswolf/DSA_BIT/blob/DSA_24/Week11/DSA_Week11.pdf) | [#8 Lab Part 2](https://github.com/noswolf/DSA_BIT/blob/DSA_24/Week11/DSA_Lab_8_student_recursion.ipynb) |    
 |Week 12| 23/09/2024 | [Week12_Trees](https://github.com/noswolf/DSA_BIT/blob/DSA_24/Week12/DSA_Week12.pdf) | No Lab | 
-|Week 13| 30/09/2024 | | |  
+|Week 13| 30/09/2024 | [Week13_Search_Trees](https://github.com/noswolf/DSA_BIT/blob/DSA_24/Week13/DSA_Week13.pdf) | [#9 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_24/Week13/DSA_Lab_9_2024_student.ipynb) |  
 |Week 14| 07/10/2024 | | |  
 |Week 15| 14/10/2024 | - | No Lab |
 |Final Exam| 22/10/2024 |  |		|
