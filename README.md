@@ -6,7 +6,7 @@ This repo consists of teaching materials (lectures and code examples) for SIIE, 
 |Week| Date | Lecture Slides|Lab Sheet|
 |---|---|---|---|
 |Week 01| 25/11/2024 | [Week1_Introduction](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week1/DSA_Week1.pdf)  | [Colab Tutorial](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week1/DSA-Colab-Tutorial.pdf), [VS Code Tutorial](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week1/Getting-Started-with-VS-Code.pdf) <br> [#1 Python Crash Course](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week1/DSA_Python_Crash_Course_stu.pdf) <br> [#1 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week1/DSA_Lab-1-student.ipynb) <br>[#1 Challenge](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week1/DSA_Lab-1-Challenge.ipynb)  |
-|Week 02| 02/12/2024 | [Week2_Algorithm_Analysis](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week2/DSA_Week2.pdf)|  |   
+|Week 02| 02/12/2024 | [Week2_Algorithm_Analysis](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week2/DSA_Week2.pdf)| [#2 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week2/DSA_Lab-2-student.ipynb) |   
 |Week 03| 09/12/2024 | [Week3_Arrays](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week3/DSA_Week3.pdf)|  |  
 |Week 04| 16/12/2024 | [Week4_Stacks](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week4/DSA_Week4.pdf)|  |     
 |Week 05| 23/12/2024 | [Week5_Queues](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week5/DSA_Week5.pdf)| -|  
