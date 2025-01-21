@@ -14,7 +14,7 @@ This repo consists of teaching materials (lectures and code examples) for SIIE, 
 |Week 07| 06/01/2025 |  [Week6_Singly_Linked_List](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week6/DSA_Week6.pdf)| [#5 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week6/DSA_Lab_5_student.ipynb) |  
 |Week 08| 13/01/2025 |  [Week7_Circular_and_Doubly_Linked_List](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week7/DSA_Week7.pdf)| [#5 Part 2 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week7/DSA_Lab_5_P2_student.ipynb) <br> [#5 Take-home Exercises](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week7/DSA_Lab_5_take-home_Exercises.ipynb)|  
 |Week --| 22/01/2025 | Mid-term | |  
-|Week 09| 27/01/2025 | [Week8_Searching](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week8/DSA_Week8.pdf) | |   
+|Week 09| 27/01/2025 | [Week8_Searching](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week8/DSA_Week8.pdf) | [#6 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week8/DSA_Lab_6_student.ipynb) <br> [#6 Challenge](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week8/DSA_Lab_6_challenge.ipynb) |   
 |Week 10| 03/02/2025 | [Week10_Sorting](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week10/DSA_Week10.pdf) |  |  
 |Week 11| 10/02/2025 | [Week11_Recursion_and_Sorting](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week11/DSA_Week11.pdf) |  |    
 |Week 12| 17/02/2025 | [Week12_Trees](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week12/DSA_Week12.pdf) | No Lab | 
