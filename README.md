@@ -18,7 +18,7 @@ This repo consists of teaching materials (lectures and code examples) for SIIE, 
 |Week 10| 03/02/2025 | [Week10_Sorting](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week10/DSA_Week10.pdf) | [#7 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week10/DSA_Lab_7_student.ipynb) |  
 |Week 11| 10/02/2025 | [Week11_Recursion_and_Sorting](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week11/DSA_Week11.pdf) | [#8 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week11/DSA_Lab_8_recursion_student.ipynb) |    
 |Week 12| 17/02/2025 | [Week12_Trees](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week12/DSA_Week12.pdf) | [#9 Pre-Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week12/DSA_Pre-Lab_9_student.ipynb) | 
-|Week 13| 24/02/2025 | [Week13_Search_Trees](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week13/DSA_Week13.pdf) |  [#8 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week13/DSA_Lab_9_2024_student.ipynb) |  
+|Week 13| 24/02/2025 | [Week13_Search_Trees](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week13/DSA_Week13.pdf) |  [#9 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week13/DSA_Lab_9_2024_student.ipynb) |  
 |Week 14| 03/03/2025 | [Week14_Graph_Algorithms](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week14/DSA_Week14.pdf) |  |  
 |Week 15| 10/03/2025 | - | No Lab |
 |Final Exam| 19/03/2025 |  |		|
