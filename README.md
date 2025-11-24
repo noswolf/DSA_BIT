@@ -2,6 +2,11 @@
 
 This repo consists of teaching materials (lectures and code examples) for SIIE, KMITL.
 
+## Contact
+
+Main Contact via TA: Discord [Link TBA]
+Urgency Contact: sirasit.lo@kmitl.ac.th
+
 ## Course Outlines
 |Week| Date | Lecture Slides|Lab Sheet|
 |---|---|---|---|
@@ -21,4 +26,4 @@ This repo consists of teaching materials (lectures and code examples) for SIIE, 
 |Week 13| 23/02/2026 | [Week13_Graph] |  [#10 Lab] |  
 |Week 14| 02/03/2026 | [Week14_Graph_Algorithms] | [#10 Lab] |  
 |Week 15| 09/03/2026 | - | No Lab |
-|Final Exam| 19/03/2026 |  |		|
+|Final Exam| 17/03/2026 |  |		|
