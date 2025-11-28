@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>01526121 Data Structures and Algorithms – Course Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --card-bg: #ffffff;
+      --accent: #2c3e50;
+      --accent-light: #3d5a80;
+      --muted: #777777;
+      --border: #dddddd;
+      --link: #1a73e8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      background-color: var(--bg);
+      color: #222222;
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1b2845, #274060);
+      color: #ffffff;
+      padding: 1.5rem 1.5rem 1rem;
+    }
+
+    header h1 {
+      margin: 0 0 0.3rem;
+      font-size: 1.8rem;
+      letter-spacing: 0.02em;
+    }
+
+    header p {
+      margin: 0;
+      font-size: 0.95rem;
+      color: #d0d8ff;
+    }
+
+    nav {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #ffffff;
+      font-size: 0.9rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    nav a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 1.5rem auto 2rem;
+      padding: 0 1rem;
+    }
+
+    section {
+      background-color: var(--card-bg);
+      border-radius: 0.75rem;
+      padding: 1.25rem 1.25rem 1rem;
+      margin-bottom: 1rem;
+      border: 1px solid var(--border);
+    }
+
+    section h2 {
+      margin-top: 0;
+      font-size: 1.2rem;
+      color: var(--accent);
+    }
+
+    .tagline {
+      font-style: italic;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
+      gap: 1.5rem;
+    }
+
+    .key-info {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .key-info li + li {
+      margin-top: 0.3rem;
+    }
+
+    .key-label {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    a {
+      color: var(--link);
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .outline-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin-top: 0.4rem;
+    }
+
+    .outline-table th,
+    .outline-table td {
+      padding: 0.45rem 0.5rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .outline-table th {
+      background-color: #f0f2f7;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .small-text {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 720px) {
+      .two-column {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>01526121 Data Structures and Algorithms</h1>
+  <p>SIIE, KMITL · Teaching materials (lectures &amp; code examples)</p>
+  <nav>
+    <a href="#overview">Overview</a>
+    <a href="#contact">Contact</a>
+    <a href="#outline">Course Outline</a>
+    <a href="#resources">Resources</a>
+  </nav>
+</header>
+
+<main>
+
+  <section id="overview">
+    <p class="tagline">Core data structures, algorithms, and how to actually use them without breaking the runtime.</p>
+    <div class="two-column">
+      <div>
+        <h2>Course Overview</h2>
+        <p>
+          This course covers fundamental data structures and algorithms used in modern software systems.
+          We focus on how to model data, choose appropriate structures, and analyze the efficiency of operations
+          using Big-O notation.
+        </p>
+        <p>
+          Lecture slides, Jupyter notebooks, and interactive guides are published in this repository and linked
+          from the course outline below.
+        </p>
+      </div>
+      <div>
+        <h2>Key Information</h2>
+        <ul class="key-info">
+          <li><span class="key-label">Course Code:</span> 01526121</li>
+          <li><span class="key-label">Course Title:</span> Data Structures and Algorithms</li>
+          <li><span class="key-label">Program:</span> Software and Information Engineering (SIIE), KMITL</li>
+          <li><span class="key-label">Repository:</span>
+            <a href="https://github.com/noswolf/DSA_BIT" target="_blank" rel="noopener">
+              github.com/noswolf/DSA_BIT
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <h2>Contact</h2>
+    <ul class="key-info">
+      <li><span class="key-label">Main contact via TA:</span> Discord (link will be provided in class)</li>
+      <li><span class="key-label">Urgency contact:</span>
+        <a href="mailto:sirasit.lo@kmitl.ac.th">sirasit.lo@kmitl.ac.th</a>
+      </li>
+    </ul>
+    <p class="small-text">
+      For general questions, use the TA Discord channel first. Use email only for urgent or personal matters.
+    </p>
+  </section>
+
+  <section id="outline">
+    <h2>Course Outline (Lecture &amp; Lab)</h2>
+    <p class="small-text">
+      Week numbers, dates, and links follow the official course README. Some later weeks are placeholders and
+      will be updated as materials are released.
+    </p>
+    <table class="outline-table">
+      <thead>
+        <tr>
+          <th>Week</th>
+          <th>Date</th>
+          <th>Lecture Slides</th>
+          <th>Lab / Exercises</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Week 01</td>
+          <td>24/11/2025</td>
+          <td>
+            <a href="https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week1/DSA_Week1.pdf" target="_blank" rel="noopener">
+              Week1_Introduction (PDF)
+            </a>
+          </td>
+          <td>
+            <a href="https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week1/DSA-Colab-Tutorial.pdf" target="_blank" rel="noopener">
+              Colab Tutorial (PDF)
+            </a><br>
+            <a href="https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week1/Getting-Started-with-VS-Code.pdf" target="_blank" rel="noopener">
+              VS Code Tutorial (PDF)
+            </a><br>
+            <a href="https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week1/DSA_Python_Crash_Course_stu.pdf" target="_blank" rel="noopener">
+              #1 Python Crash Course (PDF)
+            </a><br>
+            <a href="https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week1/DSA_Lab_1_student.ipynb" target="_blank" rel="noopener">
+              #1 Lab (Notebook)
+            </a><br>
+            <a href="https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week1/DSA_Lab_1_Challenge.ipynb" target="_blank" rel="noopener">
+              #1 Challenge (Notebook)
+            </a>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Week 02</td>
+          <td>01/12/2025</td>
+          <td>
+            <a href="https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week2/Recursion_Interactive_Guide.html" target="_blank" rel="noopener">
+              Week2_Recursion (Self-revision, HTML)
+            </a>
+          </td>
+          <td>
+            <a href="https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week2/Tutorial_Week2_student.ipynb" target="_blank" rel="noopener">
+              Week 2 Tutorial (Notebook)
+            </a><br>
+            <a href="https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week2/DSA_HW-1.ipynb" target="_blank" rel="noopener">
+              #2 Homework (Notebook)
+            </a>
+          </td>
+        </tr>
+
+        <tr>
+          <td>Week 03</td>
+          <td>08/12/2025</td>
+          <td>Week3_Algorithm_Analysis (TBA)</td>
+          <td>#2 Lab (TBA)</td>
+        </tr>
+
+        <tr>
+          <td>Week 04</td>
+          <td>15/12/2025</td>
+          <td>Week4_Arrays (TBA)</td>
+          <td>#3 Lab (TBA)</td>
+        </tr>
+
+        <tr>
+          <td>Week 05</td>
+          <td>22/12/2025</td>
+          <td>Week5_Sorting (TBA)</td>
+          <td>#4 Lab (TBA)</td>
+        </tr>
+
+        <tr>
+          <td>Week 06</td>
+          <td>29/12/2025</td>
+          <td>-</td>
+          <td>-</td>
+        </tr>
+
+        <tr>
+          <td>Week 07</td>
+          <td>05/01/2026</td>
+          <td>Week7_Stacks (TBA)</td>
+          <td>#5 Lab (TBA)</td>
+        </tr>
+
+        <tr>
+          <td>Week 08</td>
+          <td>12/01/2026</td>
+          <td>Week8_Queues (TBA)</td>
+          <td>#6 Lab (TBA)</td>
+        </tr>
+
+        <tr>
+          <td>Week --</td>
+          <td>20/01/2026</td>
+          <td>Mid-term</td>
+          <td>-</td>
+        </tr>
+
+        <tr>
+          <td>Week 09</td>
+          <td>26/01/2026</td>
+          <td>Week9_Singly_Linked_List (TBA)</td>
+          <td>#7 Part 1 Lab (TBA)</td>
+        </tr>
+
+        <tr>
+          <td>Week 10</td>
+          <td>02/02/2026</td>
+          <td>Week10_Circular_and_Doubly_Linked_List (TBA)</td>
+          <td>#7 Part 2 Lab (TBA)</td>
+        </tr>
+
+        <tr>
+          <td>Week 11</td>
+          <td>09/02/2026</td>
+          <td>Week11_Trees (TBA)</td>
+          <td>#8 Lab (TBA)</td>
+        </tr>
+
+        <tr>
+          <td>Week 12</td>
+          <td>16/02/2026</td>
+          <td>Week12_Search_Trees (TBA)</td>
+          <td>#9 Lab (TBA)</td>
+        </tr>
+
+        <tr>
+          <td>Week 13</td>
+          <td>23/02/2026</td>
+          <td>Week13_Graph (TBA)</td>
+          <td>#10 Lab (TBA)</td>
+        </tr>
+
+        <tr>
+          <td>Week 14</td>
+          <td>02/03/2026</td>
+          <td>Week14_Graph_Algorithms (TBA)</td>
+          <td>#10 Lab (TBA)</td>
+        </tr>
+
+        <tr>
+          <td>Week 15</td>
+          <td>09/03/2026</td>
+          <td>-</td>
+          <td>No Lab</td>
+        </tr>
+
+        <tr>
+          <td>Final Exam</td>
+          <td>17/03/2026</td>
+          <td colspan="2">Final exam (details TBA)</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="resources">
+    <h2>Resources</h2>
+    <ul>
+      <li>Lecture slides and lab materials are linked in the course outline above.</li>
+      <li>Additional examples and code snippets will be added to the repository as the course progresses.</li>
+      <li>Check the TA Discord and this page regularly for updates and announcements.</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  &copy; 2025–2026 01526121 Data Structures and Algorithms · SIIE, KMITL
+</footer>
+
+</body>
+</html>
