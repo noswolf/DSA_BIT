@@ -11,7 +11,7 @@ Urgency Contact: sirasit.lo@kmitl.ac.th
 |Week| Date | Lecture Slides|Lab Sheet|
 |---|---|---|---|
 |Week 01| 24/11/2025 | [Week1_Introduction](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week1/DSA_Week1.pdf)  | [Colab Tutorial](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week1/DSA-Colab-Tutorial.pdf), [VS Code Tutorial](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week1/Getting-Started-with-VS-Code.pdf) <br> [#1 Python Crash Course](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week1/DSA_Python_Crash_Course_stu.pdf) <br> [#1 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week1/DSA_Lab_1_student.ipynb) <br>[#1 Challenge](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week1/DSA_Lab_1_Challenge.ipynb)  |
-|Week 02| 01/12/2025 | [Week2_Recursion_(Self-revision)]| [#1 Homework] |   
+|Week 02| 01/12/2025 | [Week2_Recursion_(Self-revision)](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week2/Recursion_Interactive_Guide.html)| [Tutorial](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week2/Tutorial_Week2_student.ipynb) <br>  [#2 Homework](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week2/DSA_HW-1.ipynb) |   
 |Week 03| 08/12/2025 | [Week3_Algorithm_Analysis]|  [#2 Lab] |  
 |Week 04| 15/12/2025 | [Week4_Arrays]| [#3 Lab] |     
 |Week 05| 22/12/2025 | [Week5_Sorting]| [#4 Lab]|  
