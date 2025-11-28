@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide to Recursion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        .call-stack-item {
+            transition: all 0.3s ease-out;
+            transform-origin: bottom;
+        }
+
+        .code-highlight {
+            background-color: #fef9c3;
+            transition: all 0.2s ease-in-out;
+            border-left: 4px solid #facc15;
+            padding-left: 8px;
+            margin-left: -12px;
+        }
+    </style>
+    <!-- Chosen Palette: Calm Neutrals (Beige, Slate, Sky Blue) -->
+    <!-- Application Structure Plan: I've designed a single-page application structured by learning concepts rather than the report's linear order. The user is guided from the abstract concept ("What is Recursion?") to the concrete rules ("The Two Rules"), then to a hands-on "Interactive Example" which is the core of the app. This example allows users to input a number and visualize the call stack and code execution step-by-step, which is far more effective for learning than the static trace in the report. It's followed by a comparative section ("Recursion vs. Loops") and "Key Takeaways". This structure facilitates a "learn by doing" approach, making the complex topic of recursion much more understandable. -->
+    <!-- Visualization & Content Choices:
+        - Report Info: Russian Doll Analogy -> Goal: Inform -> Viz/Method: Nested HTML divs with Tailwind styling. -> Interaction: None (static visual). -> Justification: A simple, non-textual way to represent the core idea of "nested" calls.
+        - Report Info: Base Case vs. Recursive Step -> Goal: Inform/Compare -> Viz/Method: Two-column HTML/Tailwind layout with Unicode icons (🛑, 🔄). -> Interaction: None. -> Justification: Clearly separates the two essential rules.
+        - Report Info: Factorial Trace `factorial(3)` -> Goal: Teach Process -> Viz/Method: Interactive Call Stack Simulator (JS manipulating HTML divs), Side-by-Side Code Highlighting (JS toggling CSS classes), and Text Trace Output (JS updating a text area). -> Interaction: User inputs 'n', clicks 'Visualize'. JS animates the simulation. -> Justification: This is the app's main feature. It transforms the report's static text-based trace into a dynamic, visual, and interactive learning experience, which is critical for understanding the call stack.
+        - Report Info: Factorial Results (e.g., 5! = 120) -> Goal: Inform/Show Growth -> Viz/Method: Bar Chart (Chart.js/Canvas). -> Interaction: Chart updates when the user visualizes a new number. -> Justification: Fulfills the Chart.js requirement and provides context by showing the rapid growth of factorial results.
+        - Report Info: Recursion vs. Loops -> Goal: Compare -> Viz/Method: Side-by-side code blocks and a summary table (HTML/Tailwind). -> Interaction: None. -> Justification: A direct, clear comparison of the two approaches.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-2xl font-bold text-sky-600">Interactive Guide to Recursion</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#what-is" class="text-slate-600 hover:bg-slate-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">What is Recursion?</a>
+                        <a href="#rules" class="text-slate-600 hover:bg-slate-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">The Two Rules</a>
+                        <a href="#interactive" class="text-slate-600 hover:bg-slate-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Interactive Example</a>
+                        <a href="#comparison" class="text-slate-600 hover:bg-slate-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Recursion vs. Loops</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-white border border-slate-300 rounded-md p-2">
+                        <option value="#what-is">What is Recursion?</option>
+                        <option value="#rules">The Two Rules</option>
+                        <option value="#interactive">Interactive Example</option>
+                        <option value="#comparison">Recursion vs. Loops</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
+
+        <section id="what-is" class="my-12">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4">1. What is Recursion?</h2>
+            <p class="text-lg text-slate-700 mb-6">
+                This section introduces the fundamental concept of recursion. At its simplest, recursion is a way of solving a complex problem by breaking it down into smaller, identical versions of itself. A function that practices recursion is one that calls itself from within its own code.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="text-slate-700 space-y-4">
+                    <p>Think of it like a set of Russian nesting dolls. To find the smallest doll, you open the first doll, which reveals a smaller, identical-looking doll. You open <span class="font-semibold text-sky-600">that</span> doll, which reveals another... and you keep doing this "open a doll" action until you reach the very last doll that can't be opened.</p>
+                    <p>In programming, a recursive function solves a problem by:</p>
+                    <ol class="list-decimal list-inside space-y-2 pl-4">
+                        <li>Solving one small piece of the problem.</li>
+                        <li>Calling <span class="font-semibold">itself</span> to solve the "next" piece, which is a slightly smaller version of the original problem.</li>
+                    </ol>
+                </div>
+                <div class="flex items-center justify-center p-4 rounded-xl drop-shadow-xl">
+                    <img src="https://as2.ftcdn.net/jpg/02/35/64/79/1000_F_235647951_2ipU2dLjRRAlzEd7NI4lXTfoHKDVaQsS.jpg" aria-label="Outer nesting doll" class="rounded-lg">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-slate-200">
+
+        <section id="rules" class="my-12">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4">2. The Two Rules of Recursion</h2>
+            <p class="text-lg text-slate-700 mb-8">
+                For a recursive function to work correctly and not run forever, it must follow two critical rules. This section breaks down those two components: the part that stops the process and the part that keeps it going.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-red-500">
+                    <h3 class="text-2xl font-semibold text-slate-900 mb-3 flex items-center">
+                        <span class="text-3xl mr-3">🛑</span> The Base Case
+                    </h3>
+                    <p class="text-slate-700">This is the <span class="font-semibold">stopping condition</span>. It's the point at which the function *stops* calling itself and returns a simple value. In our doll analogy, this is the smallest doll that won't open. If you forget the base case, the function will call itself forever, leading to a "Stack Overflow" error.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+                    <h3 class="text-2xl font-semibold text-slate-900 mb-3 flex items-center">
+                        <span class="text-3xl mr-3">🔄</span> The Recursive Step
+                    </h3>
+                    <p class="text-slate-700">This is the part where the function <span class="font-semibold">calls itself</span>, but with a "smaller" or "simpler" version of the problem. This step must be designed to move the problem closer and closer to the base case with every call.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-slate-200">
+
+        <section id="interactive" class="my-12">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4">3. Interactive Example: Factorial</h2>
+            <p class="text-lg text-slate-700 mb-6">
+                Now let's see recursion in action. The classic example is calculating a factorial (written as `n!`), which is `n * (n-1) * (n-2) * ... * 1`. The recursive logic is `factorial(n) = n * factorial(n-1)`, with a base case of `factorial(0) = 1`.
+            </p>
+            <p class="text-lg text-slate-700 mb-8">
+                Use the controls below to visualize the factorial function. As you trace the function, pay attention to how the "Call Stack" builds up (adds functions) and then unwinds (removes functions) as it hits the base case.
+            </p>
+             <p class="text-lg mt-12 mb-4 text-sky-600 font-bold">
+                *This visualization can only calculate factorial of 0 to 7
+            </p>
+            <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+                <div class="flex flex-wrap items-center gap-4">
+                    <label for="factorial-input" class="text-lg font-semibold">Calculate Factorial of:</label>
+                    <input type="number" id="factorial-input" value="3" min="0" max="7" class="w-24 p-2 border border-slate-300 rounded-md text-lg text-center">
+                    <button id="visualize-btn" class="px-5 py-2 bg-sky-600 text-white rounded-md font-semibold hover:bg-sky-700 transition-colors">Visualize</button>
+                    <button id="reset-btn" class="px-5 py-2 bg-slate-500 text-white rounded-md font-semibold hover:bg-slate-600 transition-colors">Reset</button>
+                    <p class="text-lg font-bold ml-auto">Final Result: <span id="final-result" class="text-sky-600">?</span></p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-1 bg-white p-4 rounded-lg shadow-inner border">
+                    <h3 class="text-xl font-semibold mb-4 text-center">Call Stack</h3>
+                    <div id="call-stack" class="relative h-96 bg-slate-100 rounded-md p-2 flex flex-col-reverse justify-start items-center gap-1 overflow-hidden border border-slate-300">
+                        <div class="text-slate-500">Stack is empty...</div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-white p-4 rounded-lg shadow-inner border">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h3 class="text-xl font-semibold mb-4">Python Code</h3>
+                            <pre class="bg-slate-800 text-white p-4 rounded-md text-sm"><code id="code-block">
+<span data-line="1">def factorial(n):</span>
+<span data-line="2">    # --- The Base Case ---</span>
+<span data-line="3">    if n == 0:</span>
+<span data-line="4">        return 1</span>
+<span data-line="5">    # --- The Recursive Step ---</span>
+<span data-line="6">    else:</span>
+<span data-line="7">        return n * factorial(n - 1)</span>
+                            </code></pre>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-4">Execution Trace</h3>
+                            <div id="trace-output" class="h-96 bg-slate-100 rounded-md p-3 border border-slate-300 font-mono text-sm overflow-y-auto">
+                                Click "Visualize" to see the trace...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div classs="mt-8">
+                 <h3 class="text-2xl font-bold text-slate-900 mt-12 mb-4">Factorial Results (0! to n!)</h3>
+                 <p class="text-lg text-slate-700 mb-6">
+                    This chart shows the calculated factorial values from 0 up to the 'n' you visualized. Notice how quickly the result grows!
+                 </p>
+                <div class="bg-white p-4 rounded-lg shadow-md">
+                    <div class="chart-container">
+                        <canvas id="factorialChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-slate-200">
+
+        <section id="comparison" class="my-12">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4">4. Recursion vs. Loops (Iteration)</h2>
+            <p class="text-lg text-slate-700 mb-8">
+                You can solve many problems, including factorial, with either recursion or a simple loop (called iteration). This section compares the two approaches. While recursion can be elegant, it's not always the most efficient choice, especially in Python.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">Recursive Approach</h3>
+                    <pre class="bg-slate-800 text-white p-4 rounded-md text-sm h-full"><code id="code-block-recursive">
+def factorial_recursive(n):
+    if n == 0:
+        return 1
+    else:
+        return n * factorial_recursive(n - 1)
+                    </code></pre>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">Iterative (Loop) Approach</h3>
+                    <pre class="bg-slate-800 text-white p-4 rounded-md text-sm h-full"><code id="code-block-iterative">
+def factorial_iterative(n):
+    result = 1
+    for i in range(1, n + 1):
+        result *= i
+    return result
+                    </code></pre>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Aspect</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Recursion</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Iteration (Loops)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-slate-200">
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap font-semibold">Readability</td>
+                            <td class="px-6 py-4">Can be very elegant and closer to the mathematical definition of a problem.</td>
+                            <td class="px-6 py-4">Often more straightforward and easier to trace for beginners.</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap font-semibold">Performance</td>
+                            <td class="px-6 py-4">Each function call adds to the "call stack", consuming memory. Can be slower.</td>
+                            <td class="px-6 py-4">Generally faster and uses less memory as it doesn't involve function call overhead.</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap font-semibold">Key Risk</td>
+                            <td class="px-6 py-4">"Stack Overflow" error if the base case is missing or the problem is too large.</td>
+                            <td class="px-6 py-4">Infinite loops if the loop's exit condition is wrong.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <hr class="my-12 border-slate-200">
+
+        <section id="takeaways" class="my-12">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4">5. Key Takeaways</h2>
+            <p class="text-lg text-slate-700 mb-6">
+                Here are the most important points to remember about recursion from this guide.
+            </p>
+            <div class="bg-sky-50 border-l-4 border-sky-500 p-6 rounded-lg space-y-3">
+                <p class="text-lg text-sky-900"><span class="font-bold">1.</span> Recursion is a powerful problem-solving technique where a function calls itself.</p>
+                <p class="text-lg text-sky-900"><span class="font-bold">2.</span> It works by breaking a big problem into smaller, identical sub-problems.</p>
+                <p class="text-lg text-sky-900"><span class="font-bold">3.</span> A recursive function **must** have a <span class="font-semibold">Base Case</span> (to stop) and a <span class="font-semibold">Recursive Step</span> (to call itself).</p>
+                <p class="text-lg text-sky-900"><span class="font-bold">4.</span> While elegant, it's often less efficient (in memory and speed) than using a loop (iteration).</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-slate-300 mt-16 py-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p>An interactive SPA created from a static report.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const visualizeBtn = document.getElementById('visualize-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const inputEl = document.getElementById('factorial-input');
+            const callStackEl = document.getElementById('call-stack');
+            const traceOutputEl = document.getElementById('trace-output');
+            const finalResultEl = document.getElementById('final-result');
+            const codeLines = document.querySelectorAll('#code-block > span');
+            const mobileNav = document.getElementById('mobile-nav');
+
+            let factorialChart;
+            let animationTimeout;
+            let isAnimating = false;
+
+            const baseColors = [
+                '#38bdf8', '#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8',
+                '#1e40af', '#1e3a8a', '#172554', '#0c4a6e', '#075985'
+            ];
+
+            function getFactorialData(n) {
+                const labels = [];
+                const data = [];
+                let val = 1;
+                for (let i = 0; i <= n; i++) {
+                    if (i === 0) {
+                        val = 1;
+                    } else {
+                        val *= i;
+                    }
+                    labels.push(`${i}!`);
+                    data.push(val);
+                }
+                return { labels, data };
+            }
+
+            function initChart() {
+                const ctx = document.getElementById('factorialChart').getContext('2d');
+                const { labels, data } = getFactorialData(3);
+
+                factorialChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Factorial Value',
+                            data: data,
+                            backgroundColor: labels.map((_, i) => baseColors[i % baseColors.length] + '99'),
+                            borderColor: labels.map((_, i) => baseColors[i % baseColors.length]),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Value'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Factorial (n!)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += context.parsed.y.toLocaleString();
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateChart(n) {
+                if (n > 10) n = 10;
+                const { labels, data } = getFactorialData(n);
+                factorialChart.data.labels = labels;
+                factorialChart.data.datasets[0].data = data;
+                factorialChart.data.datasets[0].backgroundColor = labels.map((_, i) => baseColors[i % baseColors.length] + '99');
+                factorialChart.data.datasets[0].borderColor = labels.map((_, i) => baseColors[i % baseColors.length]);
+                factorialChart.update();
+            }
+
+            function clearHighlights() {
+                codeLines.forEach(line => line.classList.remove('code-highlight'));
+            }
+
+            function highlightLine(lineNumber) {
+                clearHighlights();
+                const line = document.querySelector(`[data-line="${lineNumber}"]`);
+                if (line) {
+                    line.classList.add('code-highlight');
+                }
+            }
+
+            function addToTrace(message) {
+                traceOutputEl.innerHTML += `<div>${message}</div>`;
+                traceOutputEl.scrollTop = traceOutputEl.scrollHeight;
+            }
+
+            function resetVisualization() {
+                if (animationTimeout) clearTimeout(animationTimeout);
+                isAnimating = false;
+                callStackEl.innerHTML = '<div class="text-slate-500">Stack is empty...</div>';
+                traceOutputEl.innerHTML = 'Click "Visualize" to see the trace...';
+                finalResultEl.textContent = '?';
+                clearHighlights();
+                visualizeBtn.disabled = false;
+                visualizeBtn.textContent = 'Visualize';
+            }
+
+            function addToCallStack(n) {
+                const existingEmpty = callStackEl.querySelector('.text-slate-500');
+                if (existingEmpty) existingEmpty.remove();
+
+                const item = document.createElement('div');
+                item.id = `stack-item-${n}`;
+                item.className = 'call-stack-item w-3/4 bg-sky-500 text-white font-semibold p-2 rounded-md shadow text-center transform scale-y-0';
+                item.textContent = `factorial(${n})`;
+                callStackEl.prepend(item);
+
+                requestAnimationFrame(() => {
+                    item.classList.remove('scale-y-0');
+                    item.classList.add('scale-y-100');
+                });
+            }
+
+            function removeFromCallStack(n) {
+                const item = document.getElementById(`stack-item-${n}`);
+                if (item) {
+                    item.classList.remove('scale-y-100');
+                    item.classList.add('scale-y-0');
+                    setTimeout(() => {
+                        item.remove();
+                        if (callStackEl.children.length === 0) {
+                            callStackEl.innerHTML = '<div class="text-slate-500">Stack is empty...</div>';
+                        }
+                    }, 300);
+                }
+            }
+
+            function modifyCallStack(n, returnValue) {
+                const item = document.getElementById(`stack-item-${n}`);
+                if (item) {
+                    if (n === 0) {
+                        item.classList.add('bg-green-500');
+                        item.textContent = `factorial(0) -> returns 1`;
+                    } else {
+                        item.classList.add('bg-blue-600');
+                        item.textContent = `factorial(${n}) -> returns ${returnValue}`;
+                    }
+                }
+            }
+
+            async function runVisualization() {
+                if (isAnimating) return;
+
+                resetVisualization();
+                isAnimating = true;
+                visualizeBtn.disabled = true;
+                visualizeBtn.textContent = 'Visualizing...';
+                traceOutputEl.innerHTML = '';
+
+                const n = parseInt(inputEl.value);
+                if (n < 0 || n > 7) {
+                    addToTrace('Please enter a number between 0 and 7.');
+                    visualizeBtn.textContent = 'Invalid';
+                    visualizeBtn.classList.add("bg-rose-600");
+                    visualizeBtn.classList.add("hover:bg-rose-700");
+                    setTimeout(() => {
+                        resetVisualization();
+                        visualizeBtn.disabled = false;
+                        visualizeBtn.textContent = 'Visualize';
+                        visualizeBtn.classList.remove("bg-rose-600");
+                        visualizeBtn.classList.remove("hover:bg-rose-700");
+                        if (n > 7)
+                        {
+                            inputEl.value = 7;
+                        }
+                        else
+                        {
+                            inputEl.value = 0;
+                        }
+                    }, 2000);
+                    return;
+                }
+
+                updateChart(n);
+
+                const steps = [];
+                let finalCalcResult = 1;
+
+                function generateSteps(num) {
+                    steps.push({ type: 'call', n: num, line: 1 });
+
+
+                    steps.push({ type: 'check', n: num, line: 3 });
+                    if (num === 0) {
+                        steps.push({ type: 'base_case', n: num, line: 4 });
+
+                        return 1;
+                    } else {
+                        steps.push({ type: 'recursive_step', n: num, line: 7 });
+                        const result = generateSteps(num - 1);
+                        const returnValue = num * result;
+                        steps.push({ type: 'return', n: num, value: returnValue, line: 7 });
+                        return returnValue;
+                    }
+                }
+
+                callStackEl.innerHTML = '';
+                finalCalcResult = generateSteps(n);
+
+
+                let stepIndex = 0;
+
+                function animateStep() {
+                    if (stepIndex >= steps.length) {
+                        isAnimating = false;
+                        visualizeBtn.disabled = false;
+                        visualizeBtn.textContent = 'Visualize';
+                        clearHighlights();
+                        finalResultEl.textContent = finalCalcResult.toLocaleString();
+                        animationTimeout = setTimeout(() => {
+                            callStackEl.innerHTML = '<div class="text-slate-500">Stack is empty...</div>';
+                        }, 1500);
+                        return;
+                    }
+
+                    const step = steps[stepIndex];
+                    highlightLine(step.line);
+
+                    switch (step.type) {
+                        case 'call':
+                            addToTrace(`Calling factorial(${step.n})...`);
+                            addToCallStack(step.n);
+                            break;
+                        case 'check':
+                            addToTrace(`&nbsp;&nbsp;Is n == 0? (${step.n} == 0) -> ${step.n === 0}`);
+                            break;
+                        case 'base_case':
+                            addToTrace(`&nbsp;&nbsp;Yes! Hit base case. Returning 1.`);
+                            modifyCallStack(step.n);
+                            break;
+                        case 'recursive_step':
+                            addToTrace(`&nbsp;&nbsp;No. Must call factorial(${step.n - 1})`);
+                            break;
+                        case 'return':
+                            addToTrace(`&nbsp;&nbsp;Got result from factorial(${step.n - 1}).`);
+                            addToTrace(`&nbsp;&nbsp;Returning ${step.n} * (result) -> ${step.value}`);
+                            modifyCallStack(step.n, step.value);
+                            removeFromCallStack(step.n - 1);
+                            break;
+                    }
+
+                    stepIndex++;
+                    animationTimeout = setTimeout(animateStep, 1000);
+                }
+
+                animateStep();
+            }
+
+            visualizeBtn.addEventListener('click', runVisualization);
+            resetBtn.addEventListener('click', () => {
+                resetVisualization();
+                inputEl.value = '3';
+                updateChart(3);
+                finalResultEl.textContent = '?';
+            });
+
+            mobileNav.addEventListener('change', (e) => {
+                window.location.hash = e.target.value;
+            });
+
+            initChart();
+            runVisualization();
+        });
+    </script>
+</body>
+</html>
