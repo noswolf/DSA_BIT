@@ -4,7 +4,8 @@ This repo consists of teaching materials (lectures and code examples) for SIIE, 
 
 ## Contact
 
-Main Contact via TA: Discord [Link TBA]
+Main Contact via TA: Discord [Link](https://discord.gg/MKQABj89)
+
 Urgency Contact: sirasit.lo@kmitl.ac.th
 
 ## Course Outlines
