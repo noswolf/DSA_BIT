@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS101: Financial Algo Lab</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- Icons (Inline SVGs to replace lucide-react for standalone HTML) ---
+        const Icon = ({ path, size = 24, className = "" }) => (
+            <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width={size} 
+                height={size} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className={className}
+            >
+                {path}
+            </svg>
+        );
+
+        const Icons = {
+            TrendingUp: (props) => <Icon path={<><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></>} {...props} />,
+            Play: (props) => <Icon path={<polygon points="5 3 19 12 5 21 5 3" />} {...props} />,
+            RotateCcw: (props) => <Icon path={<><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12" /><path d="M3 3v9h9" /></>} {...props} />,
+            Search: (props) => <Icon path={<><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></>} {...props} />,
+            ChevronRight: (props) => <Icon path={<polyline points="9 18 15 12 9 6" />} {...props} />,
+            Info: (props) => <Icon path={<><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></>} {...props} />,
+            Server: (props) => <Icon path={<><rect x="2" y="2" width="20" height="8" rx="2" ry="2" /><rect x="2" y="14" width="20" height="8" rx="2" ry="2" /><line x1="6" y1="6" x2="6.01" y2="6" /><line x1="6" y1="18" x2="6.01" y2="18" /></>} {...props} />,
+            BarChart3: (props) => <Icon path={<><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></>} {...props} />,
+            Clock: (props) => <Icon path={<><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></>} {...props} />,
+            Database: (props) => <Icon path={<><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></>} {...props} />,
+        };
+
+        // --- Constants & Logic ---
+        const COLORS = {
+            primary: '#0f172a', // Slate 900
+            accent: '#3b82f6',  // Blue 500
+            danger: '#ef4444',  // Red 500
+            success: '#10b981', // Emerald 500
+            warning: '#f59e0b', // Amber 500
+            purple: '#8b5cf6',  // Violet 500
+        };
+
+        const calculateSteps = (n, type) => {
+            switch (type) {
+                case 'O(1)': return 1;
+                case 'O(log n)': return Math.ceil(Math.log2(n));
+                case 'O(n)': return n;
+                case 'O(n log n)': return Math.ceil(n * Math.log2(n));
+                case 'O(n^2)': return n * n;
+                default: return 0;
+            }
+        };
+
+        const getExampleContext = (type) => {
+            switch (type) {
+                case 'O(1)': return {
+                    title: "Constant Time - O(1)",
+                    scenario: "Getting the first item: prices[0]",
+                    desc: "Imagine grabbing the top paper off a stack. It doesn't matter if the stack is 1 inch high or 1 mile high; taking the top one takes the same effort.",
+                    space: "O(1) - No extra space needed."
+                };
+                case 'O(log n)': return {
+                    title: "Logarithmic Time - O(log n)",
+                    scenario: "The 'High-Low' Game on a Sorted List",
+                    desc: "Like finding a page in a book. You open the middle. If the page is too high, you ignore the second half. You keep splitting it. Very fast.",
+                    space: "O(1) - Just remembering start/end points."
+                };
+                case 'O(n)': return {
+                    title: "Linear Time - O(n)",
+                    scenario: "Simple Loop: for item in prices:",
+                    desc: "Like reading a receipt to find a mistake. You have to check line 1, then line 2, then line 3... all the way to the end.",
+                    space: "O(1) - Just a variable for the loop."
+                };
+                case 'O(n log n)': return {
+                    title: "Linearithmic Time - O(n log n)",
+                    scenario: "Sorting a messy pile: prices.sort()",
+                    desc: "Imagine sorting a deck of cards. You have to touch every card (n), and you shuffle through them multiple times (log n) to get them in order.",
+                    space: "O(n) - Often needs table space to organize."
+                };
+                case 'O(n^2)': return {
+                    title: "Quadratic Time - O(n²)",
+                    scenario: "Nested Loops: for x in list: for y in list:",
+                    desc: "Comparing everyone to everyone. Like shaking hands at a party. If 10 people arrive, that's 100 interactions. It gets slow very fast.",
+                    space: "O(1) - No extra memory, just slow."
+                };
+                default: return {};
+            }
+        };
+
+        // --- Sub-components ---
+
+        const Header = () => (
+            <header className="bg-slate-900 text-white p-6 shadow-md border-b border-slate-700">
+                <div className="max-w-6xl mx-auto flex justify-between items-center">
+                    <div>
+                        <h1 className="text-2xl font-bold flex items-center gap-2">
+                            <Icons.TrendingUp className="text-blue-400" size={24} />
+                            CS101: Financial Algo Lab
+                        </h1>
+                        <p className="text-slate-400 text-sm mt-1">Topic: Week 2 - Lists & Loops (Big-O)</p>
+                    </div>
+                    <div className="text-right text-xs text-slate-500">
+                        Prof. Gemini<br />
+                        Dept. of Financial Engineering
+                    </div>
+                </div>
+            </header>
+        );
+
+        const GraphCanvas = ({ activeType, inputN }) => {
+            const width = 300;
+            const height = 200;
+            const padding = 20;
+            const maxN = 100;
+            const maxSteps = 200;
+
+            const generatePath = (type, color, isActive) => {
+                let d = `M ${padding} ${height - padding}`;
+                for (let x = 1; x <= maxN; x += 2) {
+                    let yVal = calculateSteps(x, type);
+                    if (type === 'O(n^2)') yVal = yVal / 5;
+                    if (type === 'O(n log n)') yVal = yVal / 2;
+                    
+                    const plotX = padding + (x / maxN) * (width - 2 * padding);
+                    const plotY = (height - padding) - (Math.min(yVal, maxSteps) / maxSteps) * (height - 2 * padding);
+                    d += ` L ${plotX} ${plotY}`;
+                }
+                
+                return (
+                    <path
+                        key={type}
+                        d={d}
+                        fill="none"
+                        stroke={color}
+                        strokeWidth={isActive ? 3 : 1}
+                        strokeOpacity={isActive ? 1 : 0.2}
+                    />
+                );
+            };
+
+            const currentStepsRaw = calculateSteps(inputN, activeType);
+            let plotYRaw = currentStepsRaw;
+            if (activeType === 'O(n^2)') plotYRaw = plotYRaw / 5;
+            if (activeType === 'O(n log n)') plotYRaw = plotYRaw / 2;
+            
+            const indicatorX = padding + (inputN / maxN) * (width - 2 * padding);
+            const indicatorY = (height - padding) - (Math.min(plotYRaw, maxSteps) / maxSteps) * (height - 2 * padding);
+
+            return (
+                <div className="relative bg-slate-800 rounded-lg p-4 shadow-inner border border-slate-700 h-full">
+                    <div className="absolute top-2 left-4 text-xs text-slate-400 font-mono">Operations (Steps)</div>
+                    <div className="absolute bottom-2 right-4 text-xs text-slate-400 font-mono">Input Size (N)</div>
+                    <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
+                        <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="#475569" strokeWidth="1" />
+                        <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="#475569" strokeWidth="1" />
+                        
+                        {generatePath('O(1)', COLORS.success, activeType === 'O(1)')}
+                        {generatePath('O(log n)', COLORS.accent, activeType === 'O(log n)')}
+                        {generatePath('O(n)', COLORS.warning, activeType === 'O(n)')}
+                        {generatePath('O(n log n)', COLORS.purple, activeType === 'O(n log n)')}
+                        {generatePath('O(n^2)', COLORS.danger, activeType === 'O(n^2)')}
+
+                        <circle cx={indicatorX} cy={indicatorY} r="5" fill="white" stroke={COLORS.primary} strokeWidth="2" />
+                        <text x={indicatorX + 5} y={indicatorY - 5} fill="white" fontSize="10" fontWeight="bold">
+                            N={inputN}
+                        </text>
+                    </svg>
+                </div>
+            );
+        };
+
+        // --- Main Component ---
+
+        const App = () => {
+            const [n, setN] = useState(20);
+            const [activeComplexity, setActiveComplexity] = useState('O(n)');
+            const [isRunning, setIsRunning] = useState(false);
+            const [simProgress, setSimProgress] = useState(0);
+            
+            const context = getExampleContext(activeComplexity);
+            const theoreticalSteps = calculateSteps(n, activeComplexity);
+
+            useEffect(() => {
+                if (isRunning) {
+                    setSimProgress(0);
+                    const totalTime = 1000;
+                    const interval = 20;
+                    const steps = totalTime / interval;
+                    let currentStep = 0;
+
+                    const timer = setInterval(() => {
+                        currentStep++;
+                        setSimProgress((currentStep / steps) * 100);
+                        if (currentStep >= steps) {
+                            clearInterval(timer);
+                            setIsRunning(false);
+                        }
+                    }, interval);
+
+                    return () => clearInterval(timer);
+                }
+            }, [isRunning]);
+
+            const handleComplexityChange = (type) => {
+                setActiveComplexity(type);
+                setSimProgress(0);
+                setIsRunning(false);
+            };
+
+            return (
+                <div className="min-h-screen bg-slate-50 text-slate-800">
+                    <Header />
+
+                    <main className="max-w-6xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        
+                        {/* LEFT COLUMN: Controls & Context */}
+                        <div className="lg:col-span-4 space-y-6">
+                        
+                            {/* Complexity Selector */}
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                                <div className="bg-slate-100 p-3 border-b border-slate-200 font-semibold text-slate-700 flex items-center gap-2">
+                                    <Icons.Search size={18} /> Select Complexity
+                                </div>
+                                <div className="p-2 space-y-1">
+                                    {['O(1)', 'O(log n)', 'O(n)', 'O(n log n)', 'O(n^2)'].map((type) => (
+                                        <button
+                                            key={type}
+                                            onClick={() => handleComplexityChange(type)}
+                                            className={`w-full text-left px-4 py-3 rounded-lg flex justify-between items-center transition-all ${
+                                                activeComplexity === type 
+                                                ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-sm' 
+                                                : 'hover:bg-slate-50 text-slate-600'
+                                            }`}
+                                        >
+                                            <span className="font-mono font-bold">{type}</span>
+                                            {activeComplexity === type && <Icons.ChevronRight size={16} />}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Input Controls */}
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Input Size (N): {n} items
+                                </label>
+                                <input
+                                    type="range"
+                                    min="5"
+                                    max="100"
+                                    value={n}
+                                    onChange={(e) => setN(parseInt(e.target.value))}
+                                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                                />
+                                <div className="mt-4 flex gap-2">
+                                    <button 
+                                        onClick={() => setIsRunning(true)}
+                                        disabled={isRunning}
+                                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 font-medium transition-colors disabled:opacity-50"
+                                    >
+                                        {isRunning ? 'Processing...' : <><Icons.Play size={16} /> Run Simulation</>}
+                                    </button>
+                                    <button 
+                                        onClick={() => setN(10)} 
+                                        className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg border border-slate-200"
+                                        title="Reset N"
+                                    >
+                                        <Icons.RotateCcw size={18} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Lecturer Notes */}
+                            <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg">
+                                <h3 className="font-bold text-amber-800 flex items-center gap-2 mb-1">
+                                    <Icons.Info size={16} /> Lecturer's Note
+                                </h3>
+                                <p className="text-sm text-amber-900 leading-relaxed">
+                                    {activeComplexity === 'O(n^2)' ? (
+                                        "Watch out for the 'Death Zone' (Red Curve). If you put a loop INSIDE another loop, the work multiplies. For 100 items, you do 10,000 steps! Be careful with nested loops."
+                                    ) : activeComplexity === 'O(log n)' ? (
+                                        "This is the power of splitting things in half. Even if N is 100, we only need about 7 guesses to find a number. This is why we like sorted lists."
+                                    ) : activeComplexity === 'O(1)' ? (
+                                        "This is instant. If you know exactly where something is (like index [0]), it takes 1 step. It doesn't matter if the list has a billion items."
+                                    ) : (
+                                        "Linear O(n) is your standard loop. 'for item in list'. If the list doubles in size, the work doubles. It's fair, but can get slow if the list is huge."
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* RIGHT COLUMN: Visualization */}
+                        <div className="lg:col-span-8 space-y-6">
+                        
+                            {/* Main Visualizer Board */}
+                            <div className="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
+                                <div className="bg-slate-100 p-4 border-b border-slate-200 flex justify-between items-center">
+                                    <h2 className="font-bold text-slate-800 flex items-center gap-2">
+                                        <Icons.Server size={20} className="text-slate-500" />
+                                        Step Simulator
+                                    </h2>
+                                    <span className="bg-slate-200 text-slate-600 px-3 py-1 rounded-full text-xs font-mono">
+                                        {context.title}
+                                    </span>
+                                </div>
+                                
+                                <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    
+                                    {/* Graph */}
+                                    <div className="h-64">
+                                        <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                            <Icons.BarChart3 size={14} /> Performance Curve
+                                        </h4>
+                                        <GraphCanvas activeType={activeComplexity} inputN={n} />
+                                    </div>
+
+                                    {/* Real-time Metrics */}
+                                    <div className="flex flex-col justify-center space-y-4">
+                                        <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                                            <div className="text-xs text-slate-500 mb-1">Real World Analogy</div>
+                                            <div className="text-sm font-medium text-slate-800">{context.scenario}</div>
+                                            <div className="text-xs text-slate-500 mt-2 italic">{context.desc}</div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                                                <div className="text-xs text-blue-600 mb-1 flex items-center gap-1">
+                                                    <Icons.Clock size={12} /> Work Done
+                                                </div>
+                                                <div className="text-2xl font-bold text-slate-800 font-mono">
+                                                    {isRunning ? Math.floor(theoreticalSteps * (simProgress / 100)) : theoreticalSteps}
+                                                </div>
+                                                <div className="text-xs text-slate-400 mt-1">Steps</div>
+                                            </div>
+                                            
+                                            <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
+                                                <div className="text-xs text-purple-600 mb-1 flex items-center gap-1">
+                                                    <Icons.Database size={12} /> Memory
+                                                </div>
+                                                <div className="text-sm font-medium text-slate-800 mt-1">
+                                                    {context.space}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Simulated Progress Bar */}
+                                        <div className="mt-2">
+                                            <div className="flex justify-between text-xs text-slate-500 mb-1">
+                                                <span>Running...</span>
+                                                <span>{Math.round(simProgress)}%</span>
+                                            </div>
+                                            <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                                <div 
+                                                    className={`h-full transition-all duration-100 ${
+                                                        activeComplexity === 'O(n^2)' ? 'bg-red-500' : 'bg-blue-500'
+                                                    }`}
+                                                    style={{ width: `${simProgress}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {/* Visual Representation of N Items */}
+                                <div className="bg-slate-50 p-6 border-t border-slate-200">
+                                    <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                                        Visualizing the list: [{n} items]
+                                    </h4>
+                                    <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
+                                        {Array.from({ length: n }).map((_, i) => {
+                                            // Logic to highlight items based on complexity simulation
+                                            let isActive = false;
+                                            let isChecked = false;
+
+                                            if (isRunning) {
+                                                const progressRatio = simProgress / 100;
+                                                
+                                                if (activeComplexity === 'O(1)') {
+                                                    isActive = i === 0 && progressRatio > 0.5; // Just highlight first item
+                                                } else if (activeComplexity === 'O(n)') {
+                                                    const currentIdx = Math.floor(n * progressRatio);
+                                                    isActive = i === currentIdx;
+                                                    isChecked = i < currentIdx;
+                                                } else if (activeComplexity === 'O(log n)') {
+                                                    // Very rough visual approx for binary search steps
+                                                    // Just highlight a few widely spaced items
+                                                    isChecked = i % Math.floor(n/4) === 0 && (i / n) < progressRatio;
+                                                } else if (activeComplexity === 'O(n^2)') {
+                                                    // Highlight all up to progress
+                                                    isChecked = (i / n) < progressRatio;
+                                                }
+                                            }
+
+                                            return (
+                                                <div 
+                                                    key={i} 
+                                                    className={`
+                                                        w-3 h-3 rounded-sm transition-colors duration-200
+                                                        ${isActive ? 'bg-blue-600 scale-125' : isChecked ? 'bg-slate-400' : 'bg-slate-200'}
+                                                    `}
+                                                />
+                                            )
+                                        })}
+                                    </div>
+                                    <p className="text-xs text-slate-400 mt-2">
+                                        *Each square is one number in your list.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            {/* Explanation Card */}
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                                <h3 className="font-bold text-lg mb-2">Python Example</h3>
+                                <div className="font-mono text-xs bg-slate-800 text-slate-200 p-4 rounded-lg overflow-x-auto">
+                                    {activeComplexity === 'O(n^2)' && (
+                                        <React.Fragment>
+                                            <span className="text-purple-400"># O(n²) - Nested Loops (Slow!)</span><br/>
+                                            prices = [10, 20, 30...]<br/>
+                                            <br/>
+                                            <span className="text-blue-400">for</span> x <span className="text-blue-400">in</span> prices:<br/>
+                                            &nbsp;&nbsp;<span className="text-blue-400">for</span> y <span className="text-blue-400">in</span> prices:<br/>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;print(x, y) <span className="text-gray-500"># This happens N * N times!</span>
+                                        </React.Fragment>
+                                    )}
+                                    {activeComplexity === 'O(n)' && (
+                                        <React.Fragment>
+                                            <span className="text-purple-400"># O(n) - Single Loop (Standard)</span><br/>
+                                            prices = [10, 5, 8, 20]<br/>
+                                            <br/>
+                                            <span className="text-blue-400">for</span> price <span className="text-blue-400">in</span> prices:<br/>
+                                            &nbsp;&nbsp;<span className="text-blue-400">if</span> price == 20:<br/>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;print(<span className="text-green-400">"Found it!"</span>)
+                                        </React.Fragment>
+                                    )}
+                                    {activeComplexity === 'O(log n)' && (
+                                        <React.Fragment>
+                                            <span className="text-purple-400"># O(log n) - Splitting in half</span><br/>
+                                            # Requires a SORTED list<br/>
+                                            sorted_prices = [10, 20, 30, 40, 50]<br/>
+                                            <br/>
+                                            # 1. Look at 30 (middle)<br/>
+                                            # 2. If we want 40, ignore 10 & 20.<br/>
+                                            # 3. Look at 40. Found it!
+                                        </React.Fragment>
+                                    )}
+                                    {activeComplexity === 'O(1)' && (
+                                        <React.Fragment>
+                                            <span className="text-purple-400"># O(1) - Instant Access</span><br/>
+                                            prices = [10, 20, 30]<br/>
+                                            <br/>
+                                            first_item = prices[0] <span className="text-gray-500"># Done!</span>
+                                        </React.Fragment>
+                                    )}
+                                    {activeComplexity === 'O(n log n)' && (
+                                        <React.Fragment>
+                                            <span className="text-purple-400"># O(n log n) - Sorting</span><br/>
+                                            prices = [5, 2, 9, 1]<br/>
+                                            <br/>
+                                            prices.sort() <span className="text-gray-500"># Python's sort is very efficient</span><br/>
+                                            print(prices) # [1, 2, 5, 9]
+                                        </React.Fragment>
+                                    )}
+                                </div>
+                            </div>
+
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
