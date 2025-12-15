@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01526102: DSA - Array Insertion & Big-O</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Custom range slider styling */
+        input[type=range] {
+            -webkit-appearance: none; 
+            background: transparent; 
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            margin-top: -8px;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #e2e8f0;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // --- Icons ---
+        const Icon = ({ path, size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {path}
+            </svg>
+        );
+
+        const Icons = {
+            TrendingUp: (props) => <Icon path={<><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></>} {...props} />,
+            Play: (props) => <Icon path={<polygon points="5 3 19 12 5 21 5 3" />} {...props} />,
+            RotateCcw: (props) => <Icon path={<><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12" /><path d="M3 3v9h9" /></>} {...props} />,
+            Search: (props) => <Icon path={<><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></>} {...props} />,
+            ChevronRight: (props) => <Icon path={<polyline points="9 18 15 12 9 6" />} {...props} />,
+            Info: (props) => <Icon path={<><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></>} {...props} />,
+            Server: (props) => <Icon path={<><rect x="2" y="2" width="20" height="8" rx="2" ry="2" /><rect x="2" y="14" width="20" height="8" rx="2" ry="2" /><line x1="6" y1="6" x2="6.01" y2="6" /><line x1="6" y1="18" x2="6.01" y2="18" /></>} {...props} />,
+            BarChart3: (props) => <Icon path={<><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></>} {...props} />,
+            Clock: (props) => <Icon path={<><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></>} {...props} />,
+            Database: (props) => <Icon path={<><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></>} {...props} />,
+            Layers: (props) => <Icon path={<><polygon points="12 2 2 7 12 12 22 7 12 2" /><polyline points="2 17 12 22 22 17" /><polyline points="2 12 12 17 22 12" /></>} {...props} />,
+            ArrowRight: (props) => <Icon path={<><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></>} {...props} />,
+        };
+
+        // --- Constants & Logic ---
+        const COLORS = {
+            primary: '#0f172a',
+            accent: '#3b82f6',
+            danger: '#ef4444',
+            success: '#10b981',
+            warning: '#f59e0b',
+            purple: '#8b5cf6',
+        };
+
+        // Calculates shifts required for insertion
+        const calculateShifts = (n, scenario) => {
+            switch (scenario) {
+                case 'beginning': return n; // Must shift all N items
+                case 'middle': return Math.ceil(n / 2); // Shift half
+                case 'end': return 1; // Technically 0 shifts, 1 op (assignment)
+                default: return 0;
+            }
+        };
+
+        const getContext = (scenario) => {
+            switch (scenario) {
+                case 'beginning': return {
+                    title: "Insert at Beginning",
+                    code: "list.insert(0, item)",
+                    complexity: "O(n) - Linear",
+                    desc: "This is EXPENSIVE. To make room at index 0, every single existing item must be shifted one spot to the right. If you have 1 million items, you do 1 million shifts."
+                };
+                case 'middle': return {
+                    title: "Insert in Middle",
+                    code: "list.insert(n//2, item)",
+                    complexity: "O(n) - Linear",
+                    desc: "Still Linear. We technically only shift half the items, but in Big-O notation, N/2 is still proportional to N. It grows linearly."
+                };
+                case 'end': return {
+                    title: "Append to End",
+                    code: "list.append(item)",
+                    complexity: "O(1) - Constant",
+                    desc: "This is FAST. We just place the item in the next available empty slot. No existing items need to move. Always prefer appending!"
+                };
+                default: return {};
+            }
+        };
+
+        // --- Components ---
+
+        const Header = () => (
+            <header className="bg-slate-900 text-white p-6 shadow-md border-b border-slate-700">
+                <div className="max-w-6xl mx-auto flex justify-between items-center">
+                    <div>
+                        <h1 className="text-2xl font-bold flex items-center gap-2">
+                            <Icons.TrendingUp className="text-blue-400" size={24} />
+                            01526102: DSA - Array
+                        </h1>
+                        <p className="text-slate-400 text-sm mt-1">Topic: Dynamic Arrays & Insertion Cost</p>
+                    </div>
+                    <div className="text-right text-xs text-slate-500">
+                        Generated by Gemini, Google. (2025, December 15)<br />
+                        Edited by Dr. Sirasit Lochanachit, IT KMITL
+                    </div>
+                </div>
+            </header>
+        );
+
+        const GraphCanvas = ({ activeScenario, inputN }) => {
+            const width = 300;
+            const height = 200;
+            const padding = 20;
+            const maxN = 100;
+            const maxSteps = 100; // Y-axis scale
+
+            const generatePath = (scenario, color, isActive) => {
+                let d = `M ${padding} ${height - padding}`;
+                for (let x = 1; x <= maxN; x += 1) {
+                    let yVal = calculateShifts(x, scenario);
+                    
+                    const plotX = padding + (x / maxN) * (width - 2 * padding);
+                    const plotY = (height - padding) - (Math.min(yVal, maxSteps) / maxSteps) * (height - 2 * padding);
+                    d += ` L ${plotX} ${plotY}`;
+                }
+                
+                return (
+                    <path
+                        key={scenario}
+                        d={d}
+                        fill="none"
+                        stroke={color}
+                        strokeWidth={isActive ? 3 : 1}
+                        strokeOpacity={isActive ? 1 : 0.15}
+                        strokeDasharray={isActive ? "0" : "4 2"}
+                    />
+                );
+            };
+
+            const currentSteps = calculateShifts(inputN, activeScenario);
+            const indicatorX = padding + (inputN / maxN) * (width - 2 * padding);
+            const indicatorY = (height - padding) - (Math.min(currentSteps, maxSteps) / maxSteps) * (height - 2 * padding);
+
+            return (
+                <div className="relative bg-slate-800 rounded-lg p-4 shadow-inner border border-slate-700 h-full">
+                    <div className="absolute top-2 left-4 text-xs text-slate-400 font-mono">Shifts (Cost)</div>
+                    <div className="absolute bottom-2 right-4 text-xs text-slate-400 font-mono">List Size (N)</div>
+                    <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
+                        <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="#475569" strokeWidth="1" />
+                        <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="#475569" strokeWidth="1" />
+                        
+                        {/* Reference Curves */}
+                        {generatePath('beginning', COLORS.danger, activeScenario === 'beginning')}
+                        {generatePath('middle', COLORS.warning, activeScenario === 'middle')}
+                        {generatePath('end', COLORS.success, activeScenario === 'end')}
+
+                        {/* Current Point */}
+                        <circle cx={indicatorX} cy={indicatorY} r="6" fill="white" stroke={COLORS.primary} strokeWidth="2" />
+                        
+                        {/* Labels */}
+                        <text x={indicatorX + 8} y={indicatorY - 5} fill="white" fontSize="10" fontWeight="bold">
+                            Cost: {currentSteps}
+                        </text>
+                    </svg>
+                </div>
+            );
+        };
+
+        // --- Main Component ---
+
+        const App = () => {
+            const [n, setN] = useState(20);
+            const [scenario, setScenario] = useState('beginning');
+            const [isRunning, setIsRunning] = useState(false);
+            const [simProgress, setSimProgress] = useState(0);
+            
+            const context = getContext(scenario);
+            const totalShifts = calculateShifts(n, scenario);
+
+            useEffect(() => {
+                if (isRunning) {
+                    setSimProgress(0);
+                    // Animation duration depends on shifts to show relative speed
+                    const baseTime = 500;
+                    const shiftTime = totalShifts * 20; 
+                    const duration = Math.min(2000, baseTime + shiftTime);
+                    
+                    const interval = 20;
+                    const frames = duration / interval;
+                    let currentFrame = 0;
+
+                    const timer = setInterval(() => {
+                        currentFrame++;
+                        setSimProgress((currentFrame / frames) * 100);
+                        if (currentFrame >= frames) {
+                            clearInterval(timer);
+                            setIsRunning(false);
+                        }
+                    }, interval);
+
+                    return () => clearInterval(timer);
+                }
+            }, [isRunning, totalShifts]);
+
+            const handleScenarioChange = (s) => {
+                setScenario(s);
+                setSimProgress(0);
+                setIsRunning(false);
+            };
+
+            // Visualize the Array and Shifting
+            const renderArray = () => {
+                const items = [];
+                // Indices that need to shift
+                let shiftStartIndex = -1;
+                
+                if (scenario === 'beginning') shiftStartIndex = 0;
+                else if (scenario === 'middle') shiftStartIndex = Math.floor(n / 2);
+                else shiftStartIndex = n; // No shifts for end
+
+                for (let i = 0; i < n; i++) {
+                    let state = 'default'; 
+                    let translateClass = '';
+
+                    if (isRunning || simProgress === 100) {
+                        // If appending, no visual shift needed for existing items
+                        if (scenario !== 'end' && i >= shiftStartIndex) {
+                            // Calculate if this specific item has shifted yet based on progress
+                            const totalItemsToShift = n - shiftStartIndex;
+                            const progressPerItem = 100 / (totalItemsToShift || 1); // Avoid div by 0
+                            const itemRelativeProgress = (simProgress / 100) * totalItemsToShift;
+                            
+                            // Visual wave effect: shift from right to left (opening space) or left to right?
+                            // Logically, we shift end items first to make space. 
+                            // Visualizing simpler: Turn them red to indicate "Work Done"
+                            
+                            if (i >= shiftStartIndex) {
+                                // Simple visual: everything after insertion point turns color to show it was "touched"
+                                const shiftedCount = Math.floor((simProgress / 100) * totalItemsToShift);
+                                if ((i - shiftStartIndex) < shiftedCount) {
+                                     state = 'shifting';
+                                     translateClass = 'translate-x-2 bg-red-200 border-red-400';
+                                }
+                            }
+                        }
+                    }
+
+                    let baseClasses = "w-6 h-8 rounded border flex items-center justify-center text-[10px] font-mono transition-all duration-300";
+                    let colorClasses = "bg-slate-100 border-slate-300 text-slate-400";
+                    
+                    if (state === 'shifting') {
+                        colorClasses = translateClass;
+                    }
+
+                    items.push(
+                        <div key={i} className={`${baseClasses} ${colorClasses}`}>
+                            {i}
+                        </div>
+                    );
+                }
+
+                // The New Item being inserted
+                let newItemStyle = { opacity: 0 };
+                if (isRunning || simProgress === 100) {
+                    newItemStyle.opacity = simProgress / 100;
+                    if (simProgress === 100) newItemStyle.transform = 'scale(1.1)';
+                }
+                
+                // Position logic for the new item label
+                let insertLabel = "New";
+                let insertPosClass = "";
+                if (scenario === 'beginning') insertPosClass = "left-0 -top-8 text-red-600";
+                else if (scenario === 'middle') insertPosClass = "left-1/2 -translate-x-1/2 -top-8 text-amber-600";
+                else insertPosClass = "right-0 -top-8 text-green-600";
+
+                return (
+                    <div className="relative pt-10 pb-4 px-2 overflow-hidden">
+                        {/* New Item Indicator */}
+                        <div className={`absolute font-bold text-xs animate-bounce ${insertPosClass}`} style={newItemStyle}>
+                            ⬇ Insert
+                        </div>
+                        
+                        <div className="flex gap-1">
+                            {/* Insert Placeholder for Beginning */}
+                            {scenario === 'beginning' && (
+                                <div className={`w-6 h-8 rounded border-2 border-dashed border-red-400 flex items-center justify-center bg-red-50 text-red-600 text-xs font-bold transition-all duration-500`} 
+                                     style={{ width: simProgress === 100 ? '1.5rem' : '0rem', opacity: simProgress === 100 ? 1 : 0, marginRight: '4px' }}>
+                                    X
+                                </div>
+                            )}
+
+                            {/* Middle Split Placeholder */}
+                            {scenario === 'middle' && (
+                                <div className="absolute left-1/2 w-6 h-8 border-2 border-dashed border-amber-400 bg-amber-50 z-10 flex items-center justify-center text-amber-600 font-bold"
+                                     style={{ 
+                                         opacity: simProgress === 100 ? 1 : 0, 
+                                         transform: `translateX(-50%) scale(${simProgress === 100 ? 1 : 0})`
+                                     }}>
+                                    X
+                                </div>
+                            )}
+
+                            {items}
+
+                            {/* End Append Placeholder */}
+                            {scenario === 'end' && (
+                                <div className={`w-6 h-8 rounded border-2 border-dashed border-green-500 flex items-center justify-center bg-green-50 text-green-600 text-xs font-bold transition-all duration-300`} 
+                                     style={{ opacity: simProgress > 50 ? 1 : 0 }}>
+                                    X
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="min-h-screen bg-slate-50 text-slate-800">
+                    <Header />
+
+                    <main className="max-w-6xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        
+                        {/* LEFT COLUMN: Controls */}
+                        <div className="lg:col-span-4 space-y-6">
+                        
+                            {/* Scenario Selector */}
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                                <div className="bg-slate-100 p-3 border-b border-slate-200 font-semibold text-slate-700 flex items-center gap-2">
+                                    <Icons.Layers size={18} /> Insertion Scenario
+                                </div>
+                                <div className="p-2 space-y-1">
+                                    {[
+                                        { id: 'beginning', label: '1. Insert at Beginning', icon: <Icons.ArrowRight className="rotate-180" size={14} /> },
+                                        { id: 'middle', label: '2. Insert in Middle', icon: <div className="w-3 h-px bg-current" /> },
+                                        { id: 'end', label: '3. Append to End', icon: <Icons.ArrowRight size={14} /> }
+                                    ].map((item) => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => handleScenarioChange(item.id)}
+                                            className={`w-full text-left px-4 py-3 rounded-lg flex justify-between items-center transition-all ${
+                                                scenario === item.id 
+                                                ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-sm' 
+                                                : 'hover:bg-slate-50 text-slate-600'
+                                            }`}
+                                        >
+                                            <span className="font-semibold text-sm flex items-center gap-2">
+                                                {item.id === 'beginning' && <span className="text-red-500">●</span>}
+                                                {item.id === 'middle' && <span className="text-amber-500">●</span>}
+                                                {item.id === 'end' && <span className="text-green-500">●</span>}
+                                                {item.label}
+                                            </span>
+                                            {scenario === item.id && <Icons.ChevronRight size={16} />}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Input Controls */}
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                                <label className="block text-sm font-semibold text-slate-700 mb-2 mt-2">
+                                    Current List Size (N): {n} items
+                                </label>
+                                <input
+                                    type="range"
+                                    min="10"
+                                    max="50"
+                                    step="5"
+                                    value={n}
+                                    onChange={(e) => setN(parseInt(e.target.value))}
+                                    className="w-full mb-6"
+                                />
+                                
+                                <button 
+                                    onClick={() => setIsRunning(true)}
+                                    disabled={isRunning}
+                                    className={`w-full py-3 rounded-lg flex items-center justify-center gap-2 font-bold text-white transition-all shadow-md ${
+                                        isRunning ? 'bg-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg active:scale-95'
+                                    }`}
+                                >
+                                    {isRunning ? 'Inserting...' : <><Icons.Play size={18} /> Simulate Insertion</>}
+                                </button>
+                            </div>
+
+                            {/* Complexity Note */}
+                             <div className={`p-4 rounded-lg border-l-4 text-sm leading-relaxed ${
+                                scenario === 'end' ? 'bg-green-50 border-green-500 text-green-900' :
+                                scenario === 'beginning' ? 'bg-red-50 border-red-500 text-red-900' :
+                                'bg-amber-50 border-amber-500 text-amber-900'
+                            }`}>
+                                <strong className="block mb-1 flex items-center gap-2">
+                                    <Icons.Info size={16} /> 
+                                    Big-O: {context.complexity}
+                                </strong>
+                                {context.desc}
+                            </div>
+                        </div>
+
+                        {/* RIGHT COLUMN: Visualization */}
+                        <div className="lg:col-span-8 space-y-6">
+                        
+                            {/* Dashboard */}
+                            <div className="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden min-h-[500px] flex flex-col">
+                                <div className="bg-slate-100 p-4 border-b border-slate-200 flex justify-between items-center">
+                                    <h2 className="font-bold text-slate-800 flex items-center gap-2">
+                                        <Icons.Server size={20} className="text-slate-500" />
+                                        Operation Visualizer
+                                    </h2>
+                                    <div className="font-mono text-xs bg-slate-200 px-3 py-1 rounded text-slate-600">
+                                        {context.code}
+                                    </div>
+                                </div>
+                                
+                                <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8 flex-grow">
+                                    
+                                    {/* Graph Section */}
+                                    <div className="flex flex-col">
+                                        <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                            <Icons.BarChart3 size={14} /> Cost Curve (Shifts vs N)
+                                        </h4>
+                                        <div className="flex-grow min-h-[200px]">
+                                            <GraphCanvas activeScenario={scenario} inputN={n} />
+                                        </div>
+                                    </div>
+
+                                    {/* Metrics Section */}
+                                    <div className="flex flex-col space-y-4 justify-center">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className={`p-4 rounded-lg border ${
+                                                scenario === 'beginning' ? 'bg-red-50 border-red-100' : 
+                                                scenario === 'middle' ? 'bg-amber-50 border-amber-100' : 
+                                                'bg-green-50 border-green-100'
+                                            }`}>
+                                                <div className="text-xs opacity-70 mb-1 flex items-center gap-1 font-bold uppercase">
+                                                    <Icons.Clock size={12} /> Shifts Needed
+                                                </div>
+                                                <div className="text-3xl font-bold font-mono">
+                                                    {isRunning ? Math.floor(totalShifts * (simProgress / 100)) : totalShifts}
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex flex-col justify-center">
+                                                <div className="text-xs text-slate-500 mb-1 font-bold uppercase">Efficiency</div>
+                                                <div className="text-sm font-medium">
+                                                    {scenario === 'end' ? 'Excellent' : scenario === 'middle' ? 'Poor' : 'Worst'}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Progress Bar */}
+                                        <div>
+                                            <div className="flex justify-between text-xs text-slate-500 mb-1 font-mono">
+                                                <span>Operation Progress</span>
+                                                <span>{Math.round(simProgress)}%</span>
+                                            </div>
+                                            <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                                <div 
+                                                    className={`h-full transition-all duration-75 ${
+                                                        scenario === 'beginning' ? 'bg-red-500' : scenario === 'end' ? 'bg-green-500' : 'bg-amber-500'
+                                                    }`}
+                                                    style={{ width: `${simProgress}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {/* Visualizer Grid */}
+                                <div className="bg-slate-50 p-6 border-t border-slate-200">
+                                    <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                                        Memory Layout (Visualizing Shifts)
+                                    </h4>
+                                    <div className="w-full overflow-x-auto">
+                                        {renderArray()}
+                                    </div>
+                                    <p className="text-[10px] text-slate-400 mt-2 text-center">
+                                        *Colored items indicate elements that must be moved in memory to make space.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>I made some changes. I fixed a syntax error in the `ArrowRight` icon definition by wrapping adjacent `line` and `polyline` elements in a React fragment (`<>...</>`). This should resolve the parsing issue you were seeing.
