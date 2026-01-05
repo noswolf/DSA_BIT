@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Sorting Visualizer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .bar-transition { transition: all 0.3s ease-in-out; }
+        .nav-btn.active { background-color: #2563eb; color: white; border-color: #2563eb; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans flex flex-col items-center p-4 md:p-8">
+
+    <!-- Navigation -->
+    <div class="mb-8 flex flex-wrap justify-center gap-2 md:gap-4">
+        <button onclick="switchAlgo('bubble')" id="nav-bubble" class="nav-btn active px-4 py-2 rounded-full border border-slate-300 bg-white text-slate-700 font-semibold shadow-sm hover:bg-slate-50 transition-colors">Bubble Sort</button>
+        <button onclick="switchAlgo('selection')" id="nav-selection" class="nav-btn px-4 py-2 rounded-full border border-slate-300 bg-white text-slate-700 font-semibold shadow-sm hover:bg-slate-50 transition-colors">Selection Sort</button>
+        <button onclick="switchAlgo('insertion')" id="nav-insertion" class="nav-btn px-4 py-2 rounded-full border border-slate-300 bg-white text-slate-700 font-semibold shadow-sm hover:bg-slate-50 transition-colors">Insertion Sort</button>
+        <button onclick="switchAlgo('merge')" id="nav-merge" class="nav-btn px-4 py-2 rounded-full border border-slate-300 bg-white text-slate-700 font-semibold shadow-sm hover:bg-slate-50 transition-colors">Merge Sort</button>
+    </div>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 id="algo-title" class="text-3xl font-bold text-slate-800 mb-2">Bubble Sort Visualizer</h1>
+        <p class="text-slate-500">Visualizing sort for: [78, 56, 32, 45, 8, 23, 19]</p>
+    </div>
+
+    <!-- Stats Board -->
+    <div class="grid grid-cols-2 gap-4 w-full max-w-4xl mb-8">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-amber-100 rounded-lg text-amber-600">
+                    <i data-lucide="eye" width="20"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 uppercase font-semibold tracking-wider">Comparisons</p>
+                    <p id="stat-comparisons" class="text-2xl font-bold text-slate-800">0</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-rose-100 rounded-lg text-rose-600">
+                    <i data-lucide="arrow-right-left" width="20"></i>
+                </div>
+                <div>
+                    <p id="stat-label-secondary" class="text-xs text-slate-500 uppercase font-semibold tracking-wider">Exchanges</p>
+                    <p id="stat-secondary" class="text-2xl font-bold text-slate-800">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Visualization Area -->
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-lg border border-slate-200 p-8 mb-8 min-h-[350px] flex flex-col justify-end items-center relative overflow-hidden">
+        
+        <!-- Action Message Overlay -->
+        <div class="absolute top-4 left-0 right-0 text-center z-10">
+            <span id="action-message" class="inline-block px-4 py-2 rounded-full text-sm font-semibold shadow-sm bg-slate-100 text-slate-600 transition-colors duration-300">
+                Initial Unsorted List
+            </span>
+        </div>
+
+        <!-- Bars Container -->
+        <div id="bars-container" class="flex items-end justify-center gap-2 md:gap-4 w-full h-64">
+            <!-- Bars injected by JS -->
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex flex-col gap-6 w-full max-w-2xl">
+        
+        <!-- Progress Bar -->
+        <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-blue-600 transition-all duration-300 ease-out" style="width: 0%"></div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex items-center justify-between gap-4">
+            <button onclick="reset()" class="p-3 text-slate-500 hover:bg-slate-100 rounded-full transition-colors" title="Reset">
+                <i data-lucide="rotate-ccw" width="20"></i>
+            </button>
+
+            <div class="flex items-center gap-4">
+                <button onclick="prevStep()" id="btn-prev" class="p-3 bg-white border border-slate-200 shadow-sm rounded-full text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-all active:scale-95">
+                    <i data-lucide="chevron-left" width="24"></i>
+                </button>
+
+                <button onclick="togglePlay()" id="btn-play" class="p-4 rounded-full shadow-md text-white transition-all active:scale-95 bg-blue-600 hover:bg-blue-700">
+                    <i data-lucide="play" width="28" class="ml-1"></i>
+                </button>
+
+                <button onclick="nextStep()" id="btn-next" class="p-3 bg-white border border-slate-200 shadow-sm rounded-full text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-all active:scale-95">
+                    <i data-lucide="chevron-right" width="24"></i>
+                </button>
+            </div>
+
+            <div class="flex flex-col items-end min-w-[100px]">
+                <span class="text-xs text-slate-500 font-semibold mb-1">SPEED</span>
+                <div class="flex gap-1" id="speed-controls">
+                    <button onclick="setSpeed(1200)" id="speed-1200" class="w-8 h-8 rounded text-xs font-bold transition-colors bg-slate-200 text-slate-600 hover:bg-slate-300">1x</button>
+                    <button onclick="setSpeed(600)" id="speed-600" class="w-8 h-8 rounded text-xs font-bold transition-colors bg-slate-800 text-white">2x</button>
+                    <button onclick="setSpeed(200)" id="speed-200" class="w-8 h-8 rounded text-xs font-bold transition-colors bg-slate-200 text-slate-600 hover:bg-slate-300">3x</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dynamic Legend -->
+    <div id="legend-container" class="mt-8 flex flex-wrap justify-center gap-6 text-sm">
+        <!-- Legend items injected by JS -->
+    </div>
+
+    <!-- APP LOGIC -->
+    <script>
+        const INITIAL_ARRAY = [78, 56, 32, 45, 8, 23, 19];
+        const MAX_VALUE = Math.max(...INITIAL_ARRAY);
+        
+        // State
+        let currentAlgo = 'bubble';
+        let steps = [];
+        let currentStepIndex = 0;
+        let isPlaying = false;
+        let playbackSpeed = 800; // ms
+        let timer = null;
+
+        // --- ALGORITHM GENERATORS ---
+
+        function generateBubbleSort() {
+            let arr = [...INITIAL_ARRAY];
+            let history = [];
+            let comparisons = 0;
+            let swaps = 0;
+            let sortedIndices = new Set();
+            const n = arr.length;
+
+            history.push({ array: [...arr], comparisons: 0, swaps: 0, highlight: [], swapHighlight: [], sorted: [], message: "Initial Unsorted List", action: 'start' });
+
+            for (let i = 0; i < n - 1; i++) {
+                let swapped = false;
+                for (let j = 0; j < n - i - 1; j++) {
+                    comparisons++;
+                    history.push({ array: [...arr], comparisons, swaps, highlight: [j, j+1], swapHighlight: [], sorted: [...sortedIndices], message: `Comparing ${arr[j]} and ${arr[j+1]}`, action: 'compare' });
+
+                    if (arr[j] > arr[j + 1]) {
+                        let temp = arr[j]; arr[j] = arr[j + 1]; arr[j + 1] = temp;
+                        swaps++; swapped = true;
+                        history.push({ array: [...arr], comparisons, swaps, highlight: [], swapHighlight: [j, j+1], sorted: [...sortedIndices], message: `${temp} > ${arr[j]} - Swapping`, action: 'swap' });
+                    }
+                }
+                sortedIndices.add(n - i - 1);
+                history.push({ array: [...arr], comparisons, swaps, highlight: [], swapHighlight: [], sorted: [...sortedIndices], message: `${arr[n - i - 1]} sorted`, action: 'sorted' });
+                if (!swapped) {
+                    for (let k = 0; k < n - i - 1; k++) sortedIndices.add(k);
+                    history.push({ array: [...arr], comparisons, swaps, highlight: [], swapHighlight: [], sorted: [...sortedIndices], message: `No swaps needed. Fully sorted!`, action: 'finished' });
+                    break;
+                }
+            }
+            // Ensure final sorted
+            let finalSet = new Set(); for(let k=0; k<n; k++) finalSet.add(k);
+            if(history[history.length-1].sorted.length !== n) {
+                history.push({ array: [...arr], comparisons, swaps, highlight: [], swapHighlight: [], sorted: Array.from(finalSet), message: "Sorting Complete!", action: 'finished' });
+            }
+            return history;
+        }
+
+        function generateSelectionSort() {
+            let arr = [...INITIAL_ARRAY];
+            let history = [];
+            let comparisons = 0, swaps = 0;
+            let sortedIndices = new Set();
+            const n = arr.length;
+
+            history.push({ array: [...arr], comparisons, swaps, highlight: [], minIdx: -1, swapHighlight: [], sorted: [], message: "Initial Unsorted List", action: 'start' });
+
+            for (let i = 0; i < n - 1; i++) {
+                let minIdx = i;
+                history.push({ array: [...arr], comparisons, swaps, highlight: [i], minIdx: minIdx, swapHighlight: [], sorted: [...sortedIndices], message: `Pass ${i+1}: Start scan from ${arr[i]}`, action: 'scan_start' });
+
+                for (let j = i + 1; j < n; j++) {
+                    comparisons++;
+                    history.push({ array: [...arr], comparisons, swaps, highlight: [j], minIdx: minIdx, swapHighlight: [], sorted: [...sortedIndices], message: `Comparing ${arr[j]} vs min ${arr[minIdx]}`, action: 'compare' });
+                    if (arr[j] < arr[minIdx]) {
+                        minIdx = j;
+                        history.push({ array: [...arr], comparisons, swaps, highlight: [j], minIdx: minIdx, swapHighlight: [], sorted: [...sortedIndices], message: `Found new min: ${arr[j]}`, action: 'new_min' });
+                    }
+                }
+                if (minIdx !== i) {
+                    let temp = arr[i]; arr[i] = arr[minIdx]; arr[minIdx] = temp;
+                    swaps++;
+                    history.push({ array: [...arr], comparisons, swaps, highlight: [], minIdx: -1, swapHighlight: [i, minIdx], sorted: [...sortedIndices], message: `Swapping min ${arr[i]} to pos ${i}`, action: 'swap' });
+                }
+                sortedIndices.add(i);
+                history.push({ array: [...arr], comparisons, swaps, highlight: [], minIdx: -1, swapHighlight: [], sorted: [...sortedIndices], message: `Index ${i} sorted`, action: 'sorted' });
+            }
+            sortedIndices.add(n - 1);
+            history.push({ array: [...arr], comparisons, swaps, highlight: [], minIdx: -1, swapHighlight: [], sorted: [...sortedIndices], message: "Sort Complete!", action: 'finished' });
+            return history;
+        }
+
+        function generateInsertionSort() {
+            let arr = [...INITIAL_ARRAY];
+            let history = [];
+            let comparisons = 0, shifts = 0;
+            const n = arr.length;
+
+            history.push({ array: [...arr], comparisons: 0, shifts: 0, highlight: [], keyIdx: -1, swapHighlight: [], sortedUpTo: 0, message: "Index 0 is initially sorted", action: 'start' });
+
+            for (let i = 1; i < n; i++) {
+                let keyVal = arr[i];
+                let j = i;
+                history.push({ array: [...arr], comparisons, shifts, highlight: [i], keyIdx: i, swapHighlight: [], sortedUpTo: i-1, message: `Picking ${keyVal} to insert`, action: 'pick' });
+
+                while (j > 0) {
+                    comparisons++;
+                    history.push({ array: [...arr], comparisons, shifts, highlight: [j-1, j], keyIdx: j, swapHighlight: [], sortedUpTo: i, message: `Comparing ${arr[j]} with ${arr[j-1]}`, action: 'compare' });
+
+                    if (arr[j] < arr[j - 1]) {
+                        let temp = arr[j]; arr[j] = arr[j - 1]; arr[j - 1] = temp;
+                        shifts++;
+                        history.push({ array: [...arr], comparisons, shifts, highlight: [], keyIdx: j-1, swapHighlight: [j-1, j], sortedUpTo: i, message: `Moving ${temp} left`, action: 'swap' });
+                        j--;
+                    } else {
+                        break;
+                    }
+                }
+                history.push({ array: [...arr], comparisons, shifts, highlight: [], keyIdx: -1, swapHighlight: [], sortedUpTo: i, message: `${keyVal} inserted at ${j}`, action: 'inserted' });
+            }
+            history.push({ array: [...arr], comparisons, shifts, highlight: [], keyIdx: -1, swapHighlight: [], sortedUpTo: n-1, message: "Sort Complete!", action: 'finished' });
+            return history;
+        }
+
+        function generateMergeSort() {
+            let arr = [...INITIAL_ARRAY];
+            let history = [];
+            let comparisons = 0, writes = 0;
+            const n = arr.length;
+
+            history.push({ array: [...arr], comparisons: 0, writes: 0, leftRange: [], rightRange: [], overwriteIdx: -1, sortedRange: [], message: "Initial Unsorted List", action: 'start' });
+
+            const merge = (start, mid, end) => {
+                const L = arr.slice(start, mid + 1);
+                const R = arr.slice(mid + 1, end + 1);
+                let i = 0, j = 0, k = start;
+
+                history.push({ array: [...arr], comparisons, writes, leftRange: [start, mid], rightRange: [mid+1, end], overwriteIdx: -1, sortedRange: [], message: `Merging [${start}-${mid}] and [${mid+1}-${end}]`, action: 'split' });
+
+                while (i < L.length && j < R.length) {
+                    comparisons++;
+                    history.push({ array: [...arr], comparisons, writes, leftRange: [start, mid], rightRange: [mid+1, end], overwriteIdx: k, sortedRange: [], message: `Comparing ${L[i]} vs ${R[j]}`, action: 'compare' });
+
+                    if (L[i] <= R[j]) {
+                        arr[k] = L[i]; writes++;
+                        history.push({ array: [...arr], comparisons, writes, leftRange: [start, mid], rightRange: [mid+1, end], overwriteIdx: k, sortedRange: [], message: `Picking ${L[i]} (Left)`, action: 'overwrite' });
+                        i++;
+                    } else {
+                        arr[k] = R[j]; writes++;
+                        history.push({ array: [...arr], comparisons, writes, leftRange: [start, mid], rightRange: [mid+1, end], overwriteIdx: k, sortedRange: [], message: `Picking ${R[j]} (Right)`, action: 'overwrite' });
+                        j++;
+                    }
+                    k++;
+                }
+                while (i < L.length) {
+                    arr[k] = L[i]; writes++;
+                    history.push({ array: [...arr], comparisons, writes, leftRange: [start, mid], rightRange: [mid+1, end], overwriteIdx: k, sortedRange: [], message: `Taking remaining ${L[i]} (Left)`, action: 'overwrite' });
+                    i++; k++;
+                }
+                while (j < R.length) {
+                    arr[k] = R[j]; writes++;
+                    history.push({ array: [...arr], comparisons, writes, leftRange: [start, mid], rightRange: [mid+1, end], overwriteIdx: k, sortedRange: [], message: `Taking remaining ${R[j]} (Right)`, action: 'overwrite' });
+                    j++; k++;
+                }
+            };
+
+            const mergeSort = (start, end) => {
+                if (start >= end) return;
+                const mid = Math.floor((start + end) / 2);
+                mergeSort(start, mid);
+                mergeSort(mid + 1, end);
+                merge(start, mid, end);
+            };
+
+            mergeSort(0, n - 1);
+            history.push({ array: [...arr], comparisons, writes, leftRange: [], rightRange: [], overwriteIdx: -1, sortedRange: [0, n-1], message: "Sort Complete!", action: 'finished' });
+            return history;
+        }
+
+        // --- RENDER LOGIC ---
+
+        function render() {
+            const step = steps[currentStepIndex];
+            const container = document.getElementById('bars-container');
+            container.innerHTML = '';
+
+            // Stats
+            document.getElementById('stat-comparisons').textContent = step.comparisons;
+            document.getElementById('stat-secondary').textContent = step.swaps !== undefined ? step.swaps : (step.shifts !== undefined ? step.shifts : step.writes);
+            document.getElementById('action-message').textContent = step.message;
+            document.getElementById('action-message').className = `inline-block px-4 py-2 rounded-full text-sm font-semibold shadow-sm transition-colors duration-300 ${
+                step.action === 'compare' ? 'bg-amber-100 text-amber-800' : 
+                step.action === 'swap' || step.action === 'overwrite' ? 'bg-rose-100 text-rose-800' :
+                step.action === 'sorted' || step.action === 'finished' || step.action === 'inserted' ? 'bg-emerald-100 text-emerald-800' :
+                step.action === 'pick' || step.action === 'new_min' ? 'bg-purple-100 text-purple-800' :
+                step.action === 'split' ? 'bg-blue-100 text-blue-800' :
+                'bg-slate-100 text-slate-600'
+            }`;
+
+            // Progress Bar
+            const progress = (currentStepIndex / (steps.length - 1)) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+
+            // Buttons
+            document.getElementById('btn-prev').disabled = currentStepIndex === 0;
+            document.getElementById('btn-next').disabled = currentStepIndex === steps.length - 1;
+            const playIcon = isPlaying ? '<i data-lucide="pause" width="28"></i>' : '<i data-lucide="play" width="28" class="ml-1"></i>';
+            const playBtn = document.getElementById('btn-play');
+            playBtn.innerHTML = playIcon;
+            playBtn.className = `p-4 rounded-full shadow-md text-white transition-all active:scale-95 ${isPlaying ? 'bg-amber-500 hover:bg-amber-600' : 'bg-blue-600 hover:bg-blue-700'}`;
+            lucide.createIcons();
+
+            // Bars
+            step.array.forEach((value, idx) => {
+                const barContainer = document.createElement('div');
+                barContainer.className = 'flex flex-col items-center justify-end bar-transition';
+                barContainer.style.width = '12%';
+
+                // Color Logic
+                let colorClass = 'bg-slate-200 text-slate-700 border-slate-300'; // Default
+                
+                if (currentAlgo === 'bubble') {
+                    if (step.sorted.includes(idx)) colorClass = 'bg-emerald-500 text-white border-emerald-600';
+                    else if (step.swapHighlight.includes(idx)) colorClass = 'bg-rose-500 text-white border-rose-600 shadow-lg scale-110 z-10';
+                    else if (step.highlight.includes(idx)) colorClass = 'bg-amber-400 text-white border-amber-500 scale-105';
+                } 
+                else if (currentAlgo === 'selection') {
+                    if (step.sorted.includes(idx)) colorClass = 'bg-emerald-500 text-white border-emerald-600';
+                    else if (step.swapHighlight.includes(idx)) colorClass = 'bg-rose-500 text-white border-rose-600 shadow-lg scale-110 z-10';
+                    else if (idx === step.minIdx) colorClass = 'bg-purple-600 text-white border-purple-700 scale-105 z-10 shadow-md';
+                    else if (step.highlight.includes(idx)) colorClass = 'bg-amber-400 text-white border-amber-500 scale-105';
+                }
+                else if (currentAlgo === 'insertion') {
+                    if (idx === step.keyIdx) colorClass = 'bg-purple-600 text-white border-purple-700 shadow-lg scale-110 z-20';
+                    else if (step.swapHighlight.includes(idx)) colorClass = 'bg-rose-500 text-white border-rose-600';
+                    else if (step.highlight.includes(idx)) colorClass = 'bg-amber-400 text-white border-amber-500 scale-105';
+                    else if (idx <= step.sortedUpTo) colorClass = 'bg-emerald-500 text-white border-emerald-600';
+                }
+                else if (currentAlgo === 'merge') {
+                     if (step.action === 'finished') colorClass = 'bg-emerald-500 text-white border-emerald-600';
+                     else if (idx === step.overwriteIdx) colorClass = 'bg-rose-500 text-white border-rose-600 shadow-lg scale-110 z-20';
+                     else if (step.leftRange.length && idx >= step.leftRange[0] && idx <= step.leftRange[1]) colorClass = 'bg-blue-400 text-white border-blue-500';
+                     else if (step.rightRange.length && idx >= step.rightRange[0] && idx <= step.rightRange[1]) colorClass = 'bg-purple-400 text-white border-purple-500';
+                }
+
+                const height = (value / MAX_VALUE) * 200;
+                
+                const bar = document.createElement('div');
+                bar.className = `w-full rounded-t-lg border-x border-t flex items-end justify-center pb-2 font-bold bar-transition ${colorClass}`;
+                bar.style.height = `${height}px`;
+                bar.style.minHeight = '40px';
+                
+                const valSpan = document.createElement('span');
+                valSpan.className = 'text-lg md:text-xl drop-shadow-sm';
+                valSpan.textContent = value;
+                bar.appendChild(valSpan);
+                
+                // Extra label for Insertion/Selection
+                if (currentAlgo === 'selection' && idx === step.minIdx) {
+                    const label = document.createElement('div');
+                    label.className = 'mb-1 text-xs font-bold text-purple-600 animate-bounce';
+                    label.textContent = 'MIN';
+                    barContainer.appendChild(label);
+                }
+
+                barContainer.appendChild(bar);
+                
+                const idxSpan = document.createElement('span');
+                idxSpan.className = 'mt-2 text-xs font-mono text-slate-400';
+                idxSpan.textContent = idx;
+                barContainer.appendChild(idxSpan);
+
+                container.appendChild(barContainer);
+            });
+        }
+
+        function updateLegend() {
+            const legend = document.getElementById('legend-container');
+            legend.innerHTML = '';
+            
+            let items = [];
+            if (currentAlgo === 'bubble') {
+                items = [
+                    { color: 'bg-amber-400', label: 'Comparing' },
+                    { color: 'bg-rose-500', label: 'Swapping' },
+                    { color: 'bg-emerald-500', label: 'Sorted' }
+                ];
+            } else if (currentAlgo === 'selection') {
+                items = [
+                    { color: 'bg-amber-400', label: 'Scanning' },
+                    { color: 'bg-purple-600', label: 'Current Min' },
+                    { color: 'bg-rose-500', label: 'Swapping' },
+                    { color: 'bg-emerald-500', label: 'Sorted' }
+                ];
+            } else if (currentAlgo === 'insertion') {
+                items = [
+                    { color: 'bg-amber-400', label: 'Comparing' },
+                    { color: 'bg-purple-600', label: 'Key (Insert)' },
+                    { color: 'bg-rose-500', label: 'Shifting' },
+                    { color: 'bg-emerald-500', label: 'Sorted Part' }
+                ];
+            } else if (currentAlgo === 'merge') {
+                items = [
+                    { color: 'bg-blue-400', label: 'Left Group' },
+                    { color: 'bg-purple-400', label: 'Right Group' },
+                    { color: 'bg-rose-500', label: 'Overwriting' },
+                    { color: 'bg-emerald-500', label: 'Done' }
+                ];
+            }
+
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-2';
+                div.innerHTML = `<div class="w-3 h-3 rounded-sm ${item.color}"></div><span class="text-slate-600">${item.label}</span>`;
+                legend.appendChild(div);
+            });
+        }
+
+        // --- CONTROLS ---
+
+        function switchAlgo(algo) {
+            currentAlgo = algo;
+            isPlaying = false;
+            clearInterval(timer);
+            currentStepIndex = 0;
+
+            // Nav Styling
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active', 'bg-blue-600', 'text-white'));
+            const activeBtn = document.getElementById(`nav-${algo}`);
+            activeBtn.classList.add('active');
+
+            // Titles & Generators
+            if (algo === 'bubble') {
+                document.getElementById('algo-title').textContent = 'Bubble Sort Visualizer';
+                document.getElementById('stat-label-secondary').textContent = 'Exchanges';
+                steps = generateBubbleSort();
+            } else if (algo === 'selection') {
+                document.getElementById('algo-title').textContent = 'Selection Sort Visualizer';
+                document.getElementById('stat-label-secondary').textContent = 'Exchanges';
+                steps = generateSelectionSort();
+            } else if (algo === 'insertion') {
+                document.getElementById('algo-title').textContent = 'Insertion Sort Visualizer';
+                document.getElementById('stat-label-secondary').textContent = 'Shifts/Swaps';
+                steps = generateInsertionSort();
+            } else if (algo === 'merge') {
+                document.getElementById('algo-title').textContent = 'Merge Sort Visualizer';
+                document.getElementById('stat-label-secondary').textContent = 'Writes/Merges';
+                steps = generateMergeSort();
+            }
+
+            updateLegend();
+            render();
+        }
+
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                if (currentStepIndex >= steps.length - 1) currentStepIndex = 0;
+                timer = setInterval(() => {
+                    if (currentStepIndex < steps.length - 1) {
+                        currentStepIndex++;
+                        render();
+                    } else {
+                        isPlaying = false;
+                        clearInterval(timer);
+                        render();
+                    }
+                }, playbackSpeed);
+            } else {
+                clearInterval(timer);
+            }
+            render();
+        }
+
+        function nextStep() {
+            if (currentStepIndex < steps.length - 1) {
+                currentStepIndex++;
+                render();
+            }
+        }
+
+        function prevStep() {
+            if (currentStepIndex > 0) {
+                currentStepIndex--;
+                render();
+            }
+        }
+
+        function reset() {
+            isPlaying = false;
+            clearInterval(timer);
+            currentStepIndex = 0;
+            render();
+        }
+
+        function setSpeed(ms) {
+            playbackSpeed = ms;
+            // Update UI
+            document.querySelectorAll('#speed-controls button').forEach(btn => {
+                btn.className = 'w-8 h-8 rounded text-xs font-bold transition-colors bg-slate-200 text-slate-600 hover:bg-slate-300';
+            });
+            const activeId = ms === 1200 ? 'speed-1200' : (ms === 600 ? 'speed-600' : 'speed-200');
+            document.getElementById(activeId).className = 'w-8 h-8 rounded text-xs font-bold transition-colors bg-slate-800 text-white';
+            
+            if (isPlaying) {
+                clearInterval(timer);
+                togglePlay(); togglePlay(); // Reset interval
+            }
+        }
+
+        // Initialize
+        switchAlgo('bubble');
+        lucide.createIcons();
+
+    </script>
+</body>
+</html>
