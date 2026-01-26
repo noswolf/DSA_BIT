@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01526121 DSA: Linked Lists (Python)</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+        }
+        .node-enter {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        /* Custom Scrollbar */
+        .list-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .list-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .list-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Utility Functions ---
+        const generateAddress = () => `0x${Math.floor(Math.random() * 0xFFFF).toString(16).toUpperCase().padStart(4, '0')}`;
+        
+        // --- Icons ---
+        const Icon = ({ name, size = 20, color = "currentColor", className="" }) => {
+            if (name === 'arrow-right') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
+            if (name === 'play') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>;
+            if (name === 'book') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>;
+            if (name === 'clock') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
+            if (name === 'refresh') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>;
+            if (name === 'repeat') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>;
+            if (name === 'cpu') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>;
+            return null;
+        };
+
+        // --- Node Component ---
+        const NodeVisual = ({ value, address, nextAddress, isNull, highlight, label, isNew }) => {
+            if (isNull) {
+                return (
+                    <div className="flex flex-col items-center mx-2 opacity-60">
+                        <div className="w-16 h-16 border-2 border-dashed border-gray-400 bg-gray-100 rounded flex items-center justify-center">
+                            <span className="text-gray-500 font-bold">None</span>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Determine border color based on state
+            let borderColor = 'border-slate-300';
+            let ringClass = '';
+            let bgColor = 'bg-white';
+            
+            if (isNew) {
+                borderColor = 'border-green-500';
+                ringClass = 'ring-2 ring-green-200';
+                bgColor = 'bg-green-50';
+            } else if (highlight) {
+                borderColor = 'border-yellow-400';
+                ringClass = 'ring-2 ring-yellow-200';
+            }
+
+            return (
+                <div className={`flex flex-col items-center mx-2 transition-all duration-300 ${highlight || isNew ? 'transform scale-105' : ''}`}>
+                    {/* Pointers Label */}
+                    {label && (
+                        <div className="mb-1 flex flex-col items-center node-enter">
+                            <span className={`text-xs px-2 py-1 rounded-full mb-1 font-bold shadow-sm ${label.includes('Tail') && !label.includes('/') ? 'bg-slate-600 text-white' : 'bg-blue-600 text-white'}`}>
+                                {label}
+                            </span>
+                            <div className={`w-0.5 h-4 ${label.includes('Tail') && !label.includes('/') ? 'bg-slate-600' : 'bg-blue-600'}`}></div>
+                            <div className={`w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[6px] ${label.includes('Tail') && !label.includes('/') ? 'border-t-slate-600' : 'border-t-blue-600'}`}></div>
+                        </div>
+                    )}
+
+                    {/* Node Box */}
+                    <div className={`node-enter flex shadow-lg rounded-lg overflow-hidden border-2 ${borderColor} ${ringClass}`}>
+                        {/* Data */}
+                        <div className={`${bgColor} p-3 w-20 flex flex-col items-center justify-center border-r border-slate-200`}>
+                            <span className="text-[10px] text-slate-400 uppercase font-bold">Data</span>
+                            <span className="text-lg font-bold text-slate-800">{value}</span>
+                        </div>
+                        
+                        {/* Next Pointer */}
+                        <div className="bg-slate-100 p-3 w-24 flex flex-col items-center justify-center relative">
+                            <span className="text-[10px] text-slate-400 uppercase font-bold">Next</span>
+                            <span className="code-font text-xs text-blue-600 font-bold">{nextAddress || 'None'}</span>
+                        </div>
+                    </div>
+
+                    {/* Address */}
+                    <div className="mt-2 code-font text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                        Addr: {address}
+                    </div>
+                </div>
+            );
+        };
+
+        const Arrow = () => (
+            <div className="flex items-center justify-center w-12 text-slate-400">
+                <Icon name="arrow-right" size={24} />
+            </div>
+        );
+
+        // --- Main App ---
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('structure');
+            const [list, setList] = useState([]);
+            const [logs, setLogs] = useState(["Welcome to the Linked List module."]);
+            const [highlightIndex, setHighlightIndex] = useState(null);
+            const [pointerLabel, setPointerLabel] = useState({}); 
+            const [stagingNode, setStagingNode] = useState(null); // For "Create First" visualization
+            const [speed, setSpeed] = useState(1); // 0.5, 1, 2
+
+            // Speed Helper
+            const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms / speed));
+
+            const log = (msg) => setLogs(prev => [msg, ...prev]);
+
+            // Reset Function
+            const resetList = () => {
+                setHighlightIndex(null);
+                setPointerLabel({});
+                setStagingNode(null);
+                setLogs([`Resetting environment for ${activeTab}...`]);
+                
+                if (activeTab === 'traversal' || activeTab === 'insertion' || activeTab === 'deletion' || activeTab === 'circular') {
+                    const addr1 = generateAddress();
+                    const addr2 = generateAddress();
+                    const addr3 = generateAddress();
+                    
+                    let nodes = [
+                        { id: 1, value: 10, address: addr1, next: addr2 },
+                        { id: 2, value: 45, address: addr2, next: addr3 },
+                        { id: 3, value: 99, address: addr3, next: null },
+                    ];
+
+                    // For Traversal tab, assign distinct memory slots to simulate random allocation
+                    if (activeTab === 'traversal') {
+                        const used = new Set();
+                        nodes = nodes.map(n => {
+                            let s;
+                            do { s = Math.floor(Math.random() * 16); } while(used.has(s)); // 16 memory slots
+                            used.add(s);
+                            return { ...n, memorySlot: s };
+                        });
+                    }
+
+                    setList(nodes);
+                    setPointerLabel({ 0: 'head' });
+                } else {
+                    setList([]);
+                }
+            };
+
+            // Initialization logic (Auto-reset on tab change)
+            useEffect(() => {
+                resetList();
+            }, [activeTab]);
+
+            // Helper to determine node label (including Tail)
+            const getNodeLabel = (index) => {
+                let label = pointerLabel[index] || "";
+                const isTail = index === list.length - 1;
+                
+                if (isTail) {
+                    if (label) label += " / Tail";
+                    else label = "Tail";
+                }
+                return label || null;
+            };
+
+            // --- Operations ---
+
+            const createHead = async () => {
+                log("Allocating memory for Head node...");
+                const addr = generateAddress();
+                const newNode = { id: Date.now(), value: Math.floor(Math.random() * 100), address: addr, next: null };
+                
+                setStagingNode(newNode);
+                await wait(1000);
+                
+                setStagingNode(null);
+                setList([newNode]);
+                setPointerLabel({ 0: 'head' });
+                log(`Head created at ${addr}. head -> ${addr}`);
+            };
+
+            const appendNode = async () => {
+                log("Creating new node...");
+                const newAddr = generateAddress();
+                const newNode = { id: Date.now(), value: Math.floor(Math.random() * 100), address: newAddr, next: null };
+                
+                setStagingNode(newNode);
+                await wait(1000);
+
+                if (list.length === 0) {
+                    setStagingNode(null);
+                    setList([newNode]);
+                    setPointerLabel({ 0: 'head' });
+                    log("List was empty. New node becomes Head.");
+                    return;
+                }
+
+                log("Traversing to Tail...");
+                const newList = [...list];
+                // Visualize traversal skipped for brevity in append, but conceptually there
+                newList[newList.length - 1].next = newAddr;
+                
+                setStagingNode(null);
+                setList([...newList, newNode]);
+                log(`Updated previous tail.next to ${newAddr}.`);
+            };
+
+            const traverseList = async () => {
+                log("Starting Traversal...");
+                for (let i = 0; i < list.length; i++) {
+                    setHighlightIndex(i);
+                    setPointerLabel({ 0: 'head', [i]: 'current' });
+                    log(`Visiting Node at ${list[i].address}. Value: ${list[i].value}.`);
+                    await wait(1000);
+                }
+                setHighlightIndex(null);
+                setPointerLabel({ 0: 'head' });
+                log("Traversal Complete. current is None.");
+            };
+
+            const insertHead = async () => {
+                log("Step 1: Create new node object in memory.");
+                const newAddr = generateAddress();
+                const newVal = Math.floor(Math.random() * 100);
+                const oldHeadAddr = list.length > 0 ? list[0].address : null;
+                
+                const newNodeObj = { id: Date.now(), value: newVal, address: newAddr, next: oldHeadAddr };
+                setStagingNode(newNodeObj);
+                await wait(1000);
+
+                log(`Step 2: Set new_node.next = head (${oldHeadAddr || 'None'}).`);
+                await wait(800);
+
+                log("Step 3: Update head = new_node.");
+                setStagingNode(null);
+                const newList = [newNodeObj, ...list];
+                setList(newList);
+                setPointerLabel({ 0: 'head' });
+                
+                setHighlightIndex(0); 
+                await wait(500);
+                setHighlightIndex(null);
+            };
+
+            const insertAtIndex1 = async () => {
+                if (list.length < 2) {
+                    log("Need at least 2 nodes to demonstrate insert between.");
+                    return;
+                }
+                const indexToInsert = 1;
+                
+                log("Step 1: Traverse to index 0 (prev).");
+                setHighlightIndex(0);
+                setPointerLabel({ 0: 'head/prev' });
+                await wait(1000);
+
+                log("Step 2: Create new node.");
+                const newAddr = generateAddress();
+                const newVal = 77;
+                const nextNodeAddr = list[indexToInsert].address;
+                const newNodeObj = { id: Date.now(), value: newVal, address: newAddr, next: nextNodeAddr };
+                
+                setStagingNode(newNodeObj);
+                await wait(1200);
+
+                log(`Step 3: Set new_node.next = prev.next (${nextNodeAddr}).`);
+                await wait(800);
+                
+                log(`Step 4: Set prev.next = new_node (${newAddr}).`);
+                const newList = [...list];
+                newList.splice(indexToInsert, 0, newNodeObj);
+                newList[indexToInsert - 1].next = newAddr;
+                
+                setStagingNode(null);
+                setList(newList);
+                setHighlightIndex(indexToInsert);
+                setPointerLabel({ 0: 'head', [indexToInsert]: 'new_node' });
+                
+                await wait(1500);
+                setHighlightIndex(null);
+                setPointerLabel({ 0: 'head' });
+            };
+
+            const insertTail = async () => {
+                if(list.length === 0) { createHead(); return; }
+                
+                log("Step 1: Create new node.");
+                const newAddr = generateAddress();
+                const newNodeObj = { id: Date.now(), value: Math.floor(Math.random() * 100), address: newAddr, next: null };
+                setStagingNode(newNodeObj);
+                await wait(1000);
+
+                log("Step 2: Traverse to find current tail.");
+                for(let i=0; i<list.length; i++) {
+                    setHighlightIndex(i);
+                    setPointerLabel({ 0: 'head', [i]: 'current' });
+                    await wait(400);
+                }
+
+                log(`Step 3: Set current.next = new_node (${newAddr}).`);
+                const newList = [...list];
+                newList[newList.length-1].next = newAddr;
+                
+                setStagingNode(null);
+                setList([...newList, newNodeObj]);
+                
+                setHighlightIndex(newList.length);
+                setPointerLabel({ 0: 'head', [newList.length]: 'tail' });
+                
+                await wait(1000);
+                setHighlightIndex(null);
+                setPointerLabel({ 0: 'head' });
+            };
+
+            const deleteHead = async () => {
+                if(list.length === 0) return;
+                log("Step 1: Identify current head.");
+                setHighlightIndex(0);
+                await wait(800);
+
+                const newList = [...list];
+                const removed = newList.shift();
+                
+                log(`Step 2: Update head = head.next.`);
+                setList(newList);
+                setPointerLabel({ 0: 'head' });
+                setHighlightIndex(null);
+                
+                if (newList.length > 0) log(`Head is now at ${newList[0].address}.`);
+                else log("List is now empty.");
+            };
+
+            const deleteMiddle = async () => {
+                if(list.length < 3) {
+                    log("Need more nodes to show middle deletion.");
+                    return;
+                }
+                const indexToDelete = 1;
+
+                log("Step 1: Traverse to node BEFORE the one to delete (prev).");
+                setHighlightIndex(0);
+                setPointerLabel({ 0: 'head/prev' });
+                await wait(1000);
+
+                log("Step 2: Identify node to delete (temp).");
+                setHighlightIndex(1);
+                setPointerLabel({ 0: 'head/prev', 1: 'temp' });
+                await wait(1000);
+
+                const newList = [...list];
+                const removed = newList.splice(indexToDelete, 1)[0];
+                newList[indexToDelete - 1].next = newList[indexToDelete].address;
+                
+                log("Step 3: prev.next = temp.next. Garbage Collector frees temp.");
+                setList(newList);
+                setHighlightIndex(null);
+                setPointerLabel({ 0: 'head' });
+            };
+
+            const deleteTail = async () => {
+                if(list.length === 0) return;
+
+                if(list.length === 1) {
+                    log("Only 1 node. Deleting Head/Tail.");
+                    setHighlightIndex(0);
+                    await wait(800);
+                    setList([]);
+                    setPointerLabel({});
+                    setHighlightIndex(null);
+                    log("List is now empty.");
+                    return;
+                }
+
+                log("Step 1: Traverse to second-to-last node.");
+                // Traverse to length - 2
+                for(let i=0; i < list.length - 1; i++) {
+                    setHighlightIndex(i);
+                    setPointerLabel({ 0: 'head', [i]: 'current' });
+                    await wait(500);
+                }
+
+                // Now at second to last
+                const secondLastIndex = list.length - 2;
+                setHighlightIndex(secondLastIndex);
+                setPointerLabel({ 0: 'head', [secondLastIndex]: 'current', [list.length - 1]: 'to_delete' });
+                log("Found second-to-last node. This will become the new Tail.");
+                await wait(1000);
+
+                log("Step 2: Update current.next = None.");
+                const newList = list.slice(0, list.length - 1);
+                // Update the new tail's next pointer to null
+                newList[newList.length - 1] = { ...newList[newList.length - 1], next: null };
+
+                setList(newList);
+                setPointerLabel({ 0: 'head', [newList.length - 1]: 'tail' });
+                setHighlightIndex(newList.length - 1); // Highlight new tail
+                
+                log("Tail deleted. Garbage Collector frees the old node.");
+                await wait(1000);
+                setHighlightIndex(null);
+                setPointerLabel({ 0: 'head' });
+            };
+
+            // --- Render Sections ---
+
+            const renderSpeedControls = () => (
+                <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-lg">
+                    <Icon name="clock" size={16} className="text-slate-500 ml-2" />
+                    <span className="text-xs font-bold text-slate-500 uppercase mr-1">Speed</span>
+                    {[0.5, 1, 2].map(s => (
+                        <button 
+                            key={s}
+                            onClick={() => setSpeed(s)}
+                            className={`px-2 py-1 text-xs font-bold rounded ${speed === s ? 'bg-white text-blue-600 shadow' : 'text-slate-400 hover:text-slate-600'}`}
+                        >
+                            {s}x
+                        </button>
+                    ))}
+                </div>
+            );
+
+            const renderStructureTab = () => (
+                 <div className="space-y-6">
+                    <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                        <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <Icon name="book" className="text-blue-600"/> Anatomy of a Node
+                        </h3>
+                        <p className="text-slate-600 mb-6">
+                            In Python, a node is simply an instance of a <strong>Class</strong>. In financial systems, think of this as a single order object. 
+                            It contains the <strong>Payload</strong> (e.g., Price) and a <strong>Reference</strong> to the next node object.
+                        </p>
+                        <div className="mt-6 bg-slate-800 p-4 rounded text-slate-200 text-sm font-mono border-l-4 border-blue-500">
+                            <div className="text-purple-400 inline">class</div> <span className="text-yellow-400">Node</span>:<br/>
+                            &nbsp;&nbsp;<div className="text-purple-400 inline">def</div> <span className="text-blue-400">__init__</span>(self, data):<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;self.data = data<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;self.next = <span className="text-purple-400">None</span>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderCreationTab = () => (
+                <div className="space-y-4">
+                    <div className="flex gap-4 mb-4">
+                        <button onClick={createHead} disabled={list.length > 0} className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 disabled:opacity-50">Initialize Head</button>
+                        <button onClick={appendNode} disabled={list.length === 0} className="px-4 py-2 bg-green-600 text-white rounded shadow hover:bg-green-700 disabled:opacity-50">Append Node</button>
+                    </div>
+                    <div className="bg-blue-50 p-4 rounded text-sm text-blue-800 border-l-4 border-blue-600">
+                        <strong>Logic:</strong> When you create the first node, the <code>head</code> variable refers to it. Subsequent nodes are linked by updating <code>current.next</code> to point to the new node instance.
+                    </div>
+                    <p className="text-slate-600 text-sm">Use the buttons to build a list. Note how <code>next</code> pointers update.</p>
+                </div>
+            );
+
+            const renderTraversalTab = () => {
+                // Generate 16 memory slots for visualization
+                const memSlots = 16;
+                return (
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <button onClick={traverseList} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded shadow hover:bg-indigo-700">
+                                <Icon name="play" size={16}/> Simulate Traversal
+                            </button>
+                            <div className="text-xs text-slate-500 italic">
+                                Watch how the traversal jumps in memory below &darr;
+                            </div>
+                        </div>
+                        {/* Info Blocks */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-white p-4 rounded shadow border border-slate-200">
+                                <h4 className="font-bold text-slate-700 mb-2">Memory View</h4>
+                                <p className="text-sm text-slate-600 mb-2">Unlike Python lists (arrays), linked nodes are scattered in memory. We follow the references.</p>
+                                <div className="code-font text-xs bg-slate-900 text-green-400 p-3 rounded">
+                                    {list.map((node, i) => (
+                                        <div key={node.id} className={highlightIndex === i ? "bg-slate-700" : ""}>
+                                            [{node.address}]: Val={node.value}, Next={node.next || 'None'}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="bg-white p-4 rounded shadow border border-slate-200">
+                                <h4 className="font-bold text-slate-700 mb-2">Algorithm & Complexity</h4>
+                                <ul className="text-sm text-slate-600 list-disc ml-4 space-y-1">
+                                    <li>Start at <code>head</code>.</li>
+                                    <li>While <code>current is not None</code>, move to <code>current.next</code>.</li>
+                                    <li><strong>Time Complexity:</strong> O(n) - Linear time. To find the 100th element, you must visit the previous 99.</li>
+                                    <li><strong>Space Complexity:</strong> O(1) - Only one temporary variable needed.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        {/* Algorithm Block */}
+                        <div className="bg-white p-4 rounded shadow border border-slate-200">
+                            <h4 className="font-bold text-slate-700 mb-2">Algorithm</h4>
+                            <code className="block text-sm bg-slate-100 p-2 rounded text-slate-700">
+                                current = head<br/>
+                                while current is not None:<br/>
+                                &nbsp;&nbsp;print(current.data)<br/>
+                                &nbsp;&nbsp;current = current.next
+                            </code>
+                        </div>
+
+                        {/* Memory Lane Visualization */}
+                        <div className="mt-6 bg-slate-800 p-4 rounded-lg shadow-inner border border-slate-700">
+                            <div className="flex items-center gap-2 mb-3">
+                                <Icon name="cpu" size={18} className="text-indigo-400" />
+                                <h4 className="text-slate-300 text-xs font-bold uppercase tracking-wider">Simulated Memory Lane (RAM)</h4>
+                            </div>
+                            
+                            <div className="grid grid-cols-8 gap-2">
+                                {Array.from({length: memSlots}).map((_, i) => {
+                                    // Check if a node occupies this memory slot
+                                    const nodeInSlot = list.find(n => n.memorySlot === i);
+                                    // Check if this slot is the one currently being visited by traversal
+                                    const isActive = highlightIndex !== null && list[highlightIndex] && list[highlightIndex].memorySlot === i;
+                                    
+                                    return (
+                                        <div key={i} className={`
+                                            relative h-12 rounded border flex flex-col items-center justify-center text-[10px] transition-all duration-300
+                                            ${isActive 
+                                                ? 'bg-yellow-400 border-yellow-500 scale-110 z-10 shadow-[0_0_15px_rgba(250,204,21,0.6)] text-slate-900 font-bold' 
+                                                : nodeInSlot 
+                                                    ? 'bg-blue-600 border-blue-500 text-white' 
+                                                    : 'bg-slate-700/50 border-slate-600 text-slate-600'}
+                                        `}>
+                                            {/* Slot Index */}
+                                            <span className="absolute top-0.5 right-1 text-[8px] opacity-60">
+                                                {i.toString(16).toUpperCase()}
+                                            </span>
+                                            
+                                            {/* Content */}
+                                            {nodeInSlot ? (
+                                                <div className="flex flex-col items-center">
+                                                    <span className="text-xs">{nodeInSlot.value}</span>
+                                                    {isActive && <span className="text-[8px] animate-pulse">READ</span>}
+                                                </div>
+                                            ) : (
+                                                <span className="text-xl leading-none opacity-20">.</span>
+                                            )}
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                            <div className="mt-3 flex justify-between items-center">
+                                <p className="text-[10px] text-slate-400">
+                                    Physical memory is contiguous (0 to F), but Linked List nodes are scattered. 
+                                    The "next" pointer bridges these gaps.
+                                </p>
+                                <div className="flex gap-2 text-[10px]">
+                                    <div className="flex items-center gap-1 text-slate-400"><div className="w-2 h-2 bg-slate-700 border border-slate-600"></div> Empty</div>
+                                    <div className="flex items-center gap-1 text-blue-400"><div className="w-2 h-2 bg-blue-600 border border-blue-500"></div> Occupied</div>
+                                    <div className="flex items-center gap-1 text-yellow-400"><div className="w-2 h-2 bg-yellow-400 border border-yellow-500"></div> Accessing</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderInsertionTab = () => (
+                 <div className="space-y-4">
+                    <div className="flex flex-wrap gap-2 mb-4">
+                        <button onClick={insertHead} className="px-4 py-2 bg-teal-600 text-white rounded shadow hover:bg-teal-700 text-sm">Insert at Head</button>
+                        <button onClick={insertAtIndex1} className="px-4 py-2 bg-teal-600 text-white rounded shadow hover:bg-teal-700 text-sm">Insert at Index 1 (Between)</button>
+                        <button onClick={insertTail} className="px-4 py-2 bg-teal-600 text-white rounded shadow hover:bg-teal-700 text-sm">Insert at Tail</button>
+                    </div>
+                    <div className="bg-teal-50 border border-teal-200 p-3 rounded text-sm text-teal-800">
+                        <strong>Visual Guide:</strong> Green node = Newly created node (Memory allocated). It will be linked into the chain.
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div className="p-3 bg-white border border-slate-200 rounded">
+                            <strong className="block text-slate-800 mb-1">Insert Head</strong>
+                            <div className="text-xs text-slate-500 mb-2">Big O: <strong>O(1)</strong></div>
+                            <p className="text-slate-600">Fastest. <br/> <code>new_node.next = head</code>, then <code>head = new_node</code>.</p>
+                        </div>
+                        <div className="p-3 bg-white border border-slate-200 rounded">
+                            <strong className="block text-slate-800 mb-1">Insert Middle</strong>
+                            <div className="text-xs text-slate-500 mb-2">Big O: <strong>O(n)</strong></div>
+                            <p className="text-slate-600">Must traverse to find insertion point. Expensive for long lists.</p>
+                        </div>
+                        <div className="p-3 bg-white border border-slate-200 rounded">
+                            <strong className="block text-slate-800 mb-1">Insert Tail</strong>
+                            <div className="text-xs text-slate-500 mb-2">Big O: <strong>O(n)</strong>*</div>
+                            <p className="text-slate-600">*O(n) if traversing from Head. <br/> O(1) if you maintain a <code>tail</code> reference.</p>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderDeletionTab = () => (
+                 <div className="space-y-4">
+                    <div className="flex flex-wrap gap-2 mb-4">
+                        <button onClick={deleteHead} className="px-4 py-2 bg-red-600 text-white rounded shadow hover:bg-red-700 text-sm">Delete Head</button>
+                        <button onClick={deleteMiddle} className="px-4 py-2 bg-red-600 text-white rounded shadow hover:bg-red-700 text-sm">Delete at Index 1</button>
+                        <button onClick={deleteTail} className="px-4 py-2 bg-red-600 text-white rounded shadow hover:bg-red-700 text-sm">Delete Tail</button>
+                    </div>
+
+                    <div className="bg-red-50 border border-red-200 p-4 rounded">
+                        <h4 className="text-red-800 font-bold mb-2">Python Garbage Collection</h4>
+                        <p className="text-sm text-red-700">
+                            When we change references (e.g., <code>prev.next = current.next</code>), the skipped node is no longer referenced. 
+                            Python's <strong>Garbage Collector</strong> automatically cleans this up. No manual memory management is required!
+                        </p>
+                    </div>
+                    
+                    <div className="flex gap-4 text-sm mt-2">
+                         <div className="p-2 bg-white border rounded shadow-sm">Delete Head: <strong>O(1)</strong></div>
+                         <div className="p-2 bg-white border rounded shadow-sm">Delete Middle/Tail: <strong>O(n)</strong></div>
+                    </div>
+                </div>
+            );
+
+            const renderCircularTab = () => (
+                <div className="space-y-6">
+                    <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                        <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <Icon name="repeat" className="text-purple-600"/> Circular Linked Lists
+                        </h3>
+                        <p className="text-slate-600 mb-4">
+                            In a Circular Linked List, the <strong>Tail</strong> node does not point to <code>None</code>. 
+                            Instead, it points back to the <strong>Head</strong>. This forms a continuous loop.
+                        </p>
+                        
+                        <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded mb-6">
+                            <h4 className="font-bold text-purple-800 mb-2">Key Differences in Operations</h4>
+                            <ul className="list-disc ml-5 space-y-2 text-sm text-purple-900">
+                                <li>
+                                    <strong>Traversal:</strong> You cannot use <code>while current is not None</code>. 
+                                    Instead, check <code>while current.next != head</code> to stop before looping infinitely.
+                                </li>
+                                <li>
+                                    <strong>Insertion (Tail):</strong> You must update the new node's next pointer to <code>head</code>, 
+                                    not <code>None</code>.
+                                </li>
+                                <li>
+                                    <strong>Insertion (Head):</strong> More complex! You must find the Tail first and update <code>tail.next</code> 
+                                    to the new head, or the loop will break.
+                                </li>
+                                <li>
+                                    <strong>Applications:</strong> Round-robin scheduling in CPUs, multiplayer or board games (turns), 
+                                    or streaming buffers.
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div className="bg-slate-800 p-4 rounded text-slate-200 text-sm font-mono">
+                            <span className="text-slate-500"># Setting up the circular link manually</span><br/>
+                            head = Node(10)<br/>
+                            second = Node(20)<br/>
+                            head.next = second<br/>
+                            second.next = <span className="text-purple-400">head</span> <span className="text-slate-500"># Points back to start!</span>
+                        </div>
+
+                        <div className="border-t border-slate-100 pt-4">
+                            <h4 className="font-bold text-slate-700 mb-3">Time Complexity (Big O)</h4>
+                            <p className="text-xs text-slate-500 mb-3">Complexity depends heavily on whether you maintain only a <code>head</code> reference or a <code>tail</code> reference.</p>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Standard/Naive Implementation */}
+                                <div className="p-3 bg-slate-50 border border-slate-200 rounded text-sm">
+                                    <strong className="block text-slate-800 mb-1 border-b border-slate-200 pb-1">Only Head Pointer</strong>
+                                    <ul className="space-y-3 text-slate-600 mt-2">
+                                        <li className="flex flex-col">
+                                            <div className="flex justify-between items-center">
+                                                <span>Insert at Head:</span> 
+                                                <span className="font-mono font-bold text-red-600 bg-red-50 px-1 rounded">O(n)</span>
+                                            </div>
+                                            <span className="text-[10px] text-slate-400 italic">Must traverse to Tail to update the loop link.</span>
+                                        </li>
+                                        <li className="flex flex-col">
+                                            <div className="flex justify-between items-center">
+                                                <span>Insert at Tail:</span> 
+                                                <span className="font-mono font-bold text-red-600 bg-red-50 px-1 rounded">O(n)</span>
+                                            </div>
+                                            <span className="text-[10px] text-slate-400 italic">Must traverse from Head to find the end.</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                {/* Optimized Implementation */}
+                                <div className="p-3 bg-green-50 border border-green-200 rounded text-sm">
+                                    <strong className="block text-green-900 mb-1 border-b border-green-200 pb-1">With Tail Pointer (Optimized)</strong>
+                                    <ul className="space-y-3 text-green-800 mt-2">
+                                        <li className="flex flex-col">
+                                            <div className="flex justify-between items-center">
+                                                <span>Insert at Head:</span> 
+                                                <span className="font-mono font-bold text-green-700 bg-green-100 px-1 rounded">O(1)</span>
+                                            </div>
+                                            <span className="text-[10px] text-green-600 italic">tail.next is head. Insert after tail, then update tail.next.</span>
+                                        </li>
+                                        <li className="flex flex-col">
+                                            <div className="flex justify-between items-center">
+                                                <span>Insert at Tail:</span> 
+                                                <span className="font-mono font-bold text-green-700 bg-green-100 px-1 rounded">O(1)</span>
+                                            </div>
+                                            <span className="text-[10px] text-green-600 italic">We already know where Tail is. Insert, then move Tail ptr.</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="flex h-screen overflow-hidden">
+                    {/* Sidebar */}
+                    <div className="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl z-10">
+                        <div className="p-6 border-b border-slate-800">
+                            <h1 className="text-xl font-bold text-white tracking-tight">Linked Lists</h1>
+                            <h2 className="text-l font-bold text-white tracking-tight">01526121 Data Structures and Algorithms</h2>
+                            <p className="text-xs text-slate-500 mt-1">Generated by Gemini, Google. (25 January 2026)</p>
+                            <p className="text-xs text-slate-500 mt-1">Edited by Dr.Sirasit Lochanachit, IT KMITL</p>
+                        </div>
+                        <nav className="flex-1 p-4 space-y-2">
+                            {[
+                                { id: 'structure', label: '1. Basic Structure' },
+                                { id: 'creation', label: '2. Creation' },
+                                { id: 'traversal', label: '3. Traversal' },
+                                { id: 'insertion', label: '4. Insertion' },
+                                { id: 'deletion', label: '5. Deletion' },
+                                { id: 'circular', label: '6. Circular Lists' }
+                            ].map(item => (
+                                <button 
+                                    key={item.id}
+                                    onClick={() => setActiveTab(item.id)}
+                                    className={`w-full text-left px-4 py-3 rounded transition-colors ${activeTab === item.id ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}
+                                >
+                                    {item.label}
+                                </button>
+                            ))}
+                        </nav>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="flex-1 flex flex-col overflow-hidden relative">
+                        {/* Header Area */}
+                        <header className="bg-white border-b border-slate-200 p-6 flex justify-between items-center">
+                            <div>
+                                <h2 className="text-2xl font-bold text-slate-800 capitalize">{activeTab} Linked List</h2>
+                                <p className="text-xs text-slate-500">Interactive Simulation</p>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                {activeTab !== 'structure' && (
+                                    <button 
+                                        onClick={resetList}
+                                        className="flex items-center gap-2 px-3 py-1 bg-white border border-slate-300 text-slate-600 rounded hover:bg-slate-50 text-xs font-bold uppercase shadow-sm"
+                                        title="Reset List"
+                                    >
+                                        <Icon name="refresh" size={14} /> Reset
+                                    </button>
+                                )}
+                                {renderSpeedControls()}
+                                <div className="text-sm bg-slate-100 px-3 py-1 rounded text-slate-600">
+                                    Nodes: {list.length}
+                                </div>
+                            </div>
+                        </header>
+
+                        {/* Visualization Area */}
+                        <div className="flex-1 bg-slate-50 p-6 overflow-x-auto overflow-y-hidden flex items-center relative list-container">
+                            
+                            {/* Staging Node (The "Creating..." visualization) */}
+                            {stagingNode && (
+                                <div className="flex items-center absolute left-6 top-10 md:static md:mr-4">
+                                    <div className="flex flex-col items-center animate-bounce">
+                                        <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded mb-2">New Node</span>
+                                        <NodeVisual 
+                                            value={stagingNode.value} 
+                                            address={stagingNode.address} 
+                                            nextAddress={stagingNode.next}
+                                            isNew={true}
+                                        />
+                                    </div>
+                                    <div className="mx-4 text-slate-400 font-bold hidden md:block">...inserting...</div>
+                                </div>
+                            )}
+
+                            {activeTab === 'structure' ? (
+                                <div className="w-full h-full flex items-center justify-center text-slate-400 italic">
+                                    Select other tabs to build the list
+                                </div>
+                            ) : (
+                                <div className="flex items-center min-w-max px-4">
+                                    {/* Always render Header Node for non-structure tabs */}
+                                    <React.Fragment>
+                                        <NodeVisual 
+                                            value={list.length}
+                                            address="0xHEAD"
+                                            nextAddress={list.length > 0 ? list[0].address : 'None'}
+                                            isHeader={true}
+                                            label="Sentinel"
+                                        />
+                                        <Arrow />
+                                    </React.Fragment>
+
+                                    {/* List Content */}
+                                    {list.length === 0 ? (
+                                        <NodeVisual isNull={true} />
+                                    ) : (
+                                        <React.Fragment>
+                                            {list.map((node, index) => {
+                                                // Special Handling for Circular Visualization
+                                                let nextAddressOverride = node.next;
+                                                if (activeTab === 'circular' && index === list.length - 1 && list.length > 0) {
+                                                    nextAddressOverride = list[0].address;
+                                                }
+
+                                                return (
+                                                    <React.Fragment key={node.id}>
+                                                        <NodeVisual 
+                                                            value={node.value} 
+                                                            address={node.address} 
+                                                            nextAddress={nextAddressOverride}
+                                                            highlight={highlightIndex === index}
+                                                            label={getNodeLabel(index)}
+                                                            isNew={highlightIndex === index && activeTab === 'insertion'}
+                                                        />
+                                                        {/* If it's the last node AND circular, we don't show the arrow to nowhere */}
+                                                        {index < list.length - 1 && <Arrow />} 
+                                                    </React.Fragment>
+                                                );
+                                            })}
+                                            
+                                            {/* For Standard Lists: Show NULL. For Circular: Show Loop Icon */}
+                                            {activeTab === 'circular' && list.length > 0 ? (
+                                                <div className="flex flex-col items-center text-purple-400 mx-2 animate-pulse">
+                                                    <div className="border-b-2 border-dashed border-purple-400 w-12 mb-1"></div>
+                                                    <Icon name="repeat" size={32} />
+                                                    <span className="text-[10px] uppercase font-bold mt-1">Loop to Head</span>
+                                                </div>
+                                            ) : (
+                                                <React.Fragment>
+                                                    {list.length > 0 && <Arrow />}
+                                                    <NodeVisual isNull={true} />
+                                                </React.Fragment>
+                                            )}
+                                        </React.Fragment>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Controls & Info Panel */}
+                        <div className="h-2/5 bg-white border-t border-slate-200 flex flex-col md:flex-row overflow-hidden">
+                            <div className="flex-1 p-6 overflow-y-auto border-r border-slate-100">
+                                {activeTab === 'structure' && renderStructureTab()}
+                                {activeTab === 'creation' && renderCreationTab()}
+                                {activeTab === 'traversal' && renderTraversalTab()}
+                                {activeTab === 'insertion' && renderInsertionTab()}
+                                {activeTab === 'deletion' && renderDeletionTab()}
+                                {activeTab === 'circular' && renderCircularTab()}
+                            </div>
+
+                            <div className="w-full md:w-80 bg-slate-900 text-slate-300 p-4 font-mono text-xs overflow-y-auto flex flex-col">
+                                <div className="font-bold text-slate-500 mb-2 uppercase border-b border-slate-700 pb-1">System Log</div>
+                                <div className="flex-1 space-y-1">
+                                    {logs.map((l, i) => (
+                                        <div key={i} className="border-l-2 border-blue-500 pl-2 py-0.5">
+                                            <span className="text-blue-400 opacity-50">[{logs.length - i}]</span> {l}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
