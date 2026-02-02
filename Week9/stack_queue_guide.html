@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01526121 Data Structures: Stacks & Queues (Python)</title>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+        }
+        .node-enter {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .node-exit {
+            animation: popOut 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+        }
+
+        button:disabled {
+            background-color: #bfc0c1;
+            color: black;
+        }
+
+        button:disabled:hover {
+            background-color: #bfc0c1 !important;
+            color: black !important;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes popOut {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        .list-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .list-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .list-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+
+
+        const Icon = ({ name, size = 20, color = "currentColor", className="" }) => {
+            if (name === 'layers') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>;
+            if (name === 'users') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>;
+            if (name === 'compare') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="16 11 20 15 16 19"></polyline><path d="M4 5h7a4 4 0 0 1 4 4v10"></path><polyline points="8 13 4 9 8 5"></polyline><path d="M20 19h-7a4 4 0 0 1-4-4V5"></path></svg>;
+            if (name === 'terminal') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>;
+            if (name === 'book') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>;
+            if (name === 'clock') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
+            if (name === 'arrow-right') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
+            if (name === 'play') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>;
+            return null;
+        };
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('basic');
+            const [data, setData] = useState([88, 42, 15]);
+            const [logs, setLogs] = useState(["Welcome to the Stack & Queue module."]);
+            const [removingIndex, setRemovingIndex] = useState(null);
+            const content = useRef(null);
+            const stackLimit = 10;
+
+            const contentOnly = [
+                "basic",
+                "Stack implementation (Array)",
+                "Stack implementation (Linked List)",
+                "Queue implementation (Array)",
+                "Queue implementation (Linked List)",
+                "Comparison of Array and Linked List (Stack)",
+                "Comparison of Array and Linked List (Queue)"
+            ]
+            const log = (msg) => setLogs(prev => [msg, ...prev]);
+
+            const handlePopOrDequeue = (index) => {
+                if (data.length === 0) return;
+
+                // 1. Mark the first item as exiting
+                setRemovingIndex(index);
+
+                // 2. Wait for the animation duration (0.4s) then update state
+                setTimeout(() => {
+                    data.splice(index, 1);
+                    setData(data);
+                    setRemovingIndex(null);
+                }, 400);
+            };
+
+            const pushStack = () => {
+                if (data.length === stackLimit) return log("Error: Stack Overflow")
+                const val = Math.floor(Math.random() * 99);
+                setData([...data, val]);
+                log(`PUSH: Added ${val} to the top of the Stack.`);
+            };
+
+            const popStack = () => {
+                if (data.length === 0) return log("Error: Stack Underflow");
+                const val = data[data.length-1];
+                handlePopOrDequeue(data.length-1);
+                log(`POP: Removed ${val} from the top.`);
+            };
+
+            const enqueueQueue = () => {
+                if (data.length === stackLimit) return log("Error: Queue Overflow");
+                const val = Math.floor(Math.random() * 99);
+                setData([...data, val]);
+                log(`ENQUEUE: Added ${val} to the back of the Queue.`);
+            };
+
+            const dequeueQueue = () => {
+                if (data.length === 0) return log("Error: Queue Underflow");
+                const val = data[0];
+                handlePopOrDequeue(0);
+                log(`DEQUEUE: Removed ${val} from the front.`);
+            };
+
+            useEffect(() => {
+                if (content.current) {
+                    content.current.scrollTop = 0;
+                }
+                log(`Switched to ${activeTab} view.`);
+            }, [activeTab]);
+
+            const renderBasicTab = () => (
+            <div className="space-y-6">
+                <section>
+                    <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <Icon name="book" className="text-blue-600"/> What is Stack and Queue?
+                    </h3>
+                    <p className="text-slate-600 mb-4">
+                        Stacks and Queues are two <strong>Linear Data Structures</strong>. Unlike standard Arrays or Linked Lists where you can access any element via an index or by traversing, Stacks and Queues are <em>restricted access</em> structures. They define a strict interface for how data enters and exits the collection.
+                    </p>
+                </section>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Stack Section */}
+                    <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                        <h3 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                            <Icon name="layers" className="text-blue-600"/> The Stack (LIFO)
+                        </h3>
+                        <div className="bg-blue-50 p-4 rounded text-sm text-blue-800 border-l-4 border-blue-600 mb-4">
+                            <strong>Last-In, First-Out:</strong> The most recently added item is the first one to be removed.
+                        </div>
+                        <ul className="text-sm text-slate-600 space-y-2">
+                            <li>• <strong>Primary Operations:</strong> <code>push()</code> to add and <code>pop()</code> to remove.</li>
+                            <li>• <strong>Analogy:</strong> A stack of cafeteria trays or "Undo" history in a text editor.</li>
+                            <li>• <strong>Access:</strong> You can only see or remove the <strong>Top</strong> element.</li>
+                        </ul>
+                    </div>
+
+                    {/* Queue Section */}
+                    <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                        <h3 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                            <Icon name="users" className="text-green-600"/> The Queue (FIFO)
+                        </h3>
+                        <div className="bg-green-50 p-4 rounded text-sm text-green-800 border-l-4 border-green-600 mb-4">
+                            <strong>First-In, First-Out:</strong> The item that has been in the collection the longest is removed first.
+                        </div>
+                        <ul className="text-sm text-slate-600 space-y-2">
+                            <li>• <strong>Primary Operations:</strong> <code>enqueue()</code> to add and <code>dequeue()</code> to remove.</li>
+                            <li>• <strong>Analogy:</strong> A line at a grocery store or a printer's task buffer.</li>
+                            <li>• <strong>Access:</strong> Additions happen at the <strong>Rear</strong>; removals happen at the <strong>Front</strong>.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <section className="bg-slate-50 p-4 rounded-lg border border-dashed border-slate-300">
+                    <h4 className="text-sm font-bold text-slate-700 uppercase mb-2">Why use them?</h4>
+                    <p className="text-sm text-slate-600">
+                        While Arrays are more flexible, Stacks and Queues provide <strong>safety and intent</strong>. By using a Stack, you guarantee that data is processed in a specific order, which is essential for some applications.
+                    </p>
+                </section>
+            </div>
+            );
+
+            const renderStackArrayImplTab = () => (
+            <div className="space-y-6">
+                <section>
+                    <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <Icon name="terminal" className="text-blue-600"/> Stack Implementation (Python List)
+                    </h3>
+                    <p className="text-slate-600 mb-4">
+                        In Python, the built-in <code>list</code> is the most efficient way to implement a stack. Since it is a dynamic array, appending and popping from the <strong>end</strong> of the list is highly optimized.
+                    </p>
+                </section>
+
+                <div className="grid grid-cols-1 gap-6">
+                    {/* Code Block */}
+                    <div className="bg-slate-900 rounded-lg overflow-hidden shadow-lg">
+                        <div className="bg-slate-800 px-4 py-2 flex justify-between items-center border-b border-slate-700">
+                            <span className="text-xs font-mono text-slate-400">stack_implementation.py</span>
+                        </div>
+                        <div className="p-4 text-sm font-mono leading-relaxed">
+                            <pre className="text-blue-300">class <span className="text-yellow-400">Stack</span>:</pre>
+                            <pre className="text-slate-300">    def <span className="text-blue-400">__init__</span>(self):</pre>
+                            <pre className="text-slate-400">        # Top of stack is the end of the list</pre>
+                            <pre className="text-slate-300">        self.items = []</pre>
+                            <br/>
+                            <pre className="text-slate-300">    def <span className="text-blue-400">push</span>(self, item):</pre>
+                            <pre className="text-slate-400">        # O(1) amortized</pre>
+                            <pre className="text-slate-300">        self.items.append(item)</pre>
+                            <br/>
+                            <pre className="text-slate-300">    def <span className="text-blue-400">pop</span>(self):</pre>
+                            <pre className="text-slate-400">        # O(1) - removes last element</pre>
+                            <pre className="text-slate-300">        if not (len(self.items) == 0):</pre>
+                            <pre className="text-slate-300">            return self.items.pop()</pre>
+                            <pre className="text-slate-300">        return None</pre>
+                        </div>
+                    </div>
+
+                    {/* Analysis Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                            <h4 className="font-bold text-blue-800 text-xs uppercase mb-1">Push</h4>
+                            <p className="text-sm text-blue-600">Uses <code>.append()</code>. Adds to the end of the array.</p>
+                        </div>
+                        <div className="p-4 bg-red-50 border border-red-100 rounded-lg">
+                            <h4 className="font-bold text-red-800 text-xs uppercase mb-1">Pop</h4>
+                            <p className="text-sm text-red-600">Uses <code>.pop()</code>. Removes the last index.</p>
+                        </div>
+                        <div className="p-4 bg-slate-100 border border-slate-200 rounded-lg">
+                            <h4 className="font-bold text-slate-800 text-xs uppercase mb-1">Efficiency</h4>
+                            <p className="text-sm text-slate-600">Both operations are <strong>O(1)</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-amber-50 p-4 rounded border-l-4 border-amber-500 text-sm text-amber-800">
+                    <strong>Important:</strong> Always use the end of the list as the "Top". Using <code>list.insert(0, val)</code> or <code>list.pop(0)</code> would force the computer to shift every other element, turning an <strong>O(1)</strong> operation into <strong>O(n)</strong>.
+                </div>
+            </div>
+            );
+
+            const renderStackLinkedImplTab = () => (
+                <div className="space-y-6">
+                    <section>
+                        <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <Icon name="terminal" className="text-blue-600"/> Stack Implementation (Linked List)
+                        </h3>
+                        <p className="text-slate-600 mb-4">
+                            Implementing a stack with a Linked List involves using a <strong>Head</strong> pointer as the "Top". New nodes are always inserted at the front, and removal also happens from the front, ensuring truly dynamic growth.
+                        </p>
+                    </section>
+
+                    <div className="grid grid-cols-1 gap-6">
+                        {/* Code Block */}
+                        <div className="bg-slate-900 rounded-lg overflow-hidden shadow-lg">
+                            <div className="bg-slate-800 px-4 py-2 flex justify-between items-center border-b border-slate-700">
+                                <span className="text-xs font-mono text-slate-400">linked_stack.py</span>
+                            </div>
+                            <div className="p-4 text-sm font-mono leading-relaxed overflow-x-auto">
+                                <pre className="text-blue-300">class <span className="text-yellow-400">Node</span>:</pre>
+                                <pre className="text-slate-300">    def <span className="text-blue-400">__init__</span>(self, data):</pre>
+                                <pre className="text-slate-300">        self.data = data</pre>
+                                <pre className="text-slate-300">        self.next = <span className="text-purple-400">None</span></pre>
+                                <br/>
+                                <pre className="text-blue-300">class <span className="text-yellow-400">LinkedStack</span>:</pre>
+                                <pre className="text-slate-300">    def <span className="text-blue-400">__init__</span>(self):</pre>
+                                <pre className="text-slate-300">        self.top = <span className="text-purple-400">None</span></pre>
+                                <br/>
+                                <pre className="text-slate-300">    def <span className="text-blue-400">push</span>(self, data):</pre>
+                                <pre className="text-slate-400">        # Insert at front (O(1))</pre>
+                                <pre className="text-slate-300">        new_node = Node(data)</pre>
+                                <pre className="text-slate-300">        new_node.next = self.top</pre>
+                                <pre className="text-slate-300">        self.top = new_node</pre>
+                                <br/>
+                                <pre className="text-slate-300">    def <span className="text-blue-400">pop</span>(self):</pre>
+                                <pre className="text-slate-400">        # Remove from front (O(1))</pre>
+                                <pre className="text-slate-300">        if self.top is <span className="text-purple-400">None</span>: return <span className="text-purple-400">None</span></pre>
+                                <pre className="text-slate-300">        popped = self.top.data</pre>
+                                <pre className="text-slate-300">        self.top = self.top.next</pre>
+                                <pre className="text-slate-300">        return popped</pre>
+                            </div>
+                        </div>
+
+                        {/* Analysis Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                                <h4 className="font-bold text-blue-800 text-xs uppercase mb-1">Structure</h4>
+                                <p className="text-sm text-blue-600">The <code>top</code> pointer always points to the first node.</p>
+                            </div>
+                            <div className="p-4 bg-purple-50 border border-purple-100 rounded-lg">
+                                <h4 className="font-bold text-purple-800 text-xs uppercase mb-1">Flexibility</h4>
+                                <p className="text-sm text-purple-600">Memory is allocated per node. No resizing overhead.</p>
+                            </div>
+                            <div className="p-4 bg-slate-100 border border-slate-200 rounded-lg">
+                                <h4 className="font-bold text-slate-800 text-xs uppercase mb-1">Efficiency</h4>
+                                <p className="text-sm text-slate-600">Strictly <strong>O(1)</strong> for both Push and Pop.</p>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div className="bg-blue-50 p-4 rounded border-l-4 border-blue-500 text-sm text-blue-800">
+                        <strong>Key Benefit:</strong> Unlike array-based stacks (Python lists), a Linked List stack never needs to reallocate or copy memory because it doesn't use contiguous space. Each "Push" simply creates a new object in memory.
+                    </div>
+                </div>
+            );
+
+            const renderStackTab = () => (
+                <div className="space-y-6">
+                    {/* Structure Section */}
+                    <section>
+                        <h3 className="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+                            <Icon name="layers" className="text-blue-600" size={18}/> Structure of a Stack
+                        </h3>
+                        <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                            A Stack is a <strong>top-heavy</strong> structure. It has only one entry and exit point called the <strong>Top</strong>.
+                            Elements are added and removed from this point only, meaning the <strong>Base</strong> (bottom) of the stack contains
+                            the oldest data which cannot be accessed until everything above it is removed.
+                        </p>
+
+                    </section>
+
+                    {/* Operations Section */}
+                    <section>
+                        <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <Icon name="terminal" className="text-blue-600" size={18}/> Operations of a Stack
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* PUSH Card */}
+                            <div className="border border-slate-200 p-4 rounded-lg bg-white shadow-sm flex flex-col justify-between">
+                                <div>
+                                    <h4 className="font-bold text-blue-600 text-sm mb-1">PUSH Operation</h4>
+                                    <p className="text-xs text-slate-500 mb-4">Adds an item to the top. If the stack has a fixed size and is full, this results in a <strong>Stack Overflow</strong>.</p>
+                                </div>
+                                <button disabled={removingIndex !== null} onClick={pushStack} className="w-full py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 font-bold transition-colors">
+                                    Execute Push
+                                </button>
+                            </div>
+
+                            {/* POP Card */}
+                            <div className="border border-slate-200 p-4 rounded-lg bg-white shadow-sm flex flex-col justify-between">
+                                <div>
+                                    <h4 className="font-bold text-red-600 text-sm mb-1">POP Operation</h4>
+                                    <p className="text-xs text-slate-500 mb-4">Removes the top item. If the stack is empty, attempting to pop results in a <strong>Stack Underflow</strong>.</p>
+                                </div>
+                                <button disabled={removingIndex !== null}  onClick={popStack} className="w-full py-2 bg-red-600 text-white rounded shadow hover:bg-red-700 font-bold transition-colors">
+                                    Execute Pop
+                                </button>
+                            </div>
+
+                            {/* PEEK Card */}
+                            <div className="border border-slate-200 p-4 rounded-lg bg-white shadow-sm">
+                                <h4 className="font-bold text-slate-700 text-sm mb-1">PEEK / TOP</h4>
+                                <p className="text-xs text-slate-500">Returns the value of the top element without removing it from the stack. Essential for inspecting the next item to be processed.</p>
+                            </div>
+
+                            {/* IS EMPTY Card */}
+                            <div className="border border-slate-200 p-4 rounded-lg bg-white shadow-sm">
+                                <h4 className="font-bold text-slate-700 text-sm mb-1">IS EMPTY</h4>
+                                <p className="text-xs text-slate-500">Returns true if the stack contains no elements. This check should always be performed before a <strong>Pop</strong>.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* LIFO Explanation */}
+                    <div className="bg-blue-50 p-4 rounded text-sm text-blue-800 border-l-4 border-blue-600">
+                        <strong>LIFO (Last-In, First-Out):</strong> Imagine a stack of dinner plates. You always place new plates on top, and you must take the top plate off before you can reach the ones below.
+                    </div>
+                </div>
+            );
+
+            const renderQueueTab = () => (
+                <div className="space-y-6">
+                    {/* Structure Section */}
+                    <section>
+                        <h3 className="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+                            <Icon name="users" className="text-green-600" size={18}/> Structure of a Queue
+                        </h3>
+                        <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                            A Queue is a <strong>double-ended</strong> linear structure that follows the principle of "First come, first served."
+                            Unlike a stack, it has two distinct points of access: the <strong>Rear</strong> (or Back) where elements are added,
+                            and the <strong>Front</strong> (or Head) where elements are removed.
+                        </p>
+
+                    </section>
+
+                    {/* Operations Section with Integrated Buttons */}
+                    <section>
+                        <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <Icon name="terminal" className="text-green-600" size={18}/> Operations of a Queue
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* ENQUEUE Card */}
+                            <div className="border border-slate-200 p-4 rounded-lg bg-white shadow-sm flex flex-col justify-between">
+                                <div>
+                                    <h4 className="font-bold text-green-600 text-sm mb-1">ENQUEUE Operation</h4>
+                                    <p className="text-xs text-slate-500 mb-4">Adds an item to the <strong>Rear</strong> of the queue. In a line of people, this is equivalent to someone joining the end of the line.</p>
+                                </div>
+                                <button disabled={removingIndex !== null}  onClick={enqueueQueue} className="w-full py-2 bg-green-600 text-white rounded shadow hover:bg-green-700 font-bold transition-colors">
+                                    Execute Enqueue
+                                </button>
+                            </div>
+
+                            {/* DEQUEUE Card */}
+                            <div className="border border-slate-200 p-4 rounded-lg bg-white shadow-sm flex flex-col justify-between">
+                                <div>
+                                    <h4 className="font-bold text-red-600 text-sm mb-1">DEQUEUE Operation</h4>
+                                    <p className="text-xs text-slate-500 mb-4">Removes the item from the <strong>Front</strong>. This is the item that has been in the queue for the longest amount of time.</p>
+                                </div>
+                                <button disabled={removingIndex !== null}  onClick={dequeueQueue} className="w-full py-2 bg-red-600 text-white rounded shadow hover:bg-red-700 font-bold transition-colors">
+                                    Execute Dequeue
+                                </button>
+                            </div>
+
+                            {/* PEEK Card */}
+                            <div className="border border-slate-200 p-4 rounded-lg bg-white shadow-sm">
+                                <h4 className="font-bold text-slate-700 text-sm mb-1">FRONT / PEEK</h4>
+                                <p className="text-xs text-slate-500">Returns the value of the element at the front without removing it. Helps identify who is "next" in line.</p>
+                            </div>
+
+                            {/* IS EMPTY Card */}
+                            <div className="border border-slate-200 p-4 rounded-lg bg-white shadow-sm">
+                                <h4 className="font-bold text-slate-700 text-sm mb-1">IS EMPTY</h4>
+                                <p className="text-xs text-slate-500">Checks if the queue is empty. Crucial to prevent errors when attempting to <strong>Dequeue</strong> from an empty set.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* FIFO Explanation */}
+                    <div className="bg-green-50 p-4 rounded text-sm text-green-800 border-l-4 border-green-600">
+                        <strong>FIFO (First-In, First-Out):</strong> Like a line at a bank or a printer queue. The first task sent to the printer is the first one that gets printed.
+                    </div>
+                </div>
+            );
+
+            const renderQueueArrayImplTab = () => (
+                <div className="space-y-6">
+                    <section>
+                        <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <Icon name="terminal" className="text-green-600"/> Queue Implementation (Array)
+                        </h3>
+                        <p className="text-slate-600 mb-4">
+                            Array-based queues can be implemented in several ways. The main challenge is handling the empty space left at the front after a removal without causing performance bottlenecks.
+                        </p>
+                    </section>
+
+                    {/* 1. NAIVE SECTION */}
+                    <section className="space-y-4">
+                        <h3 className="text-lg font-bold text-red-700 flex items-center gap-2 uppercase tracking-wide">
+                            1. Naive Implementation (Shifting Array)
+                        </h3>
+                        <p className="text-sm text-slate-600">
+                            The simplest implementation using built-in methods. However, it is fundamentally flawed for large datasets because removing the first element result in all elements getting shifted by 1 position.
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-4">
+                            <div className="bg-red-50 p-3 rounded border border-red-100">
+                                <div className="text-[10px] font-bold text-red-800 uppercase">Enqueue</div>
+                                <div className="text-lg font-mono text-red-600">O(1)</div>
+                            </div>
+                            <div className="bg-red-50 p-3 rounded border border-red-100">
+                                <div className="text-[10px] font-bold text-red-800 uppercase">Dequeue</div>
+                                <div className="text-lg font-mono text-red-600 font-bold underline">O(n)</div>
+                            </div>
+                            <div className="bg-slate-100 p-3 rounded border border-slate-200">
+                                <div className="text-[10px] font-bold text-slate-800 uppercase">Memory</div>
+                                <div className="text-lg font-mono text-slate-600">Efficient</div>
+                            </div>
+                        </div>
+
+
+
+                        <div className="bg-slate-900 rounded-lg overflow-hidden shadow-lg">
+                            <div className="bg-slate-800 px-4 py-2 text-xs font-mono text-slate-400">queue_array.py</div>
+                            <div className="p-4 text-sm font-mono leading-relaxed text-slate-300">
+                                <pre>class <span className="text-yellow-400">ArrayQueue</span>:</pre>
+                                <pre>    def <span className="text-blue-400">__init__</span>(self):</pre>
+                                <pre>        self.items = []</pre>
+                                <pre>    def <span className="text-blue-400">enqueue</span>(self, x): </pre>
+                                <pre>        self.items.append(x)</pre>
+                                <pre>    def <span className="text-blue-400">dequeue</span>(self): </pre>
+                                <pre className="text-slate-300">        if not (len(self.items) == 0):</pre>
+                                <pre className="text-red-400">            return self.items.pop(0)  # Shifting occurs here</pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* 2. TWO-POINTER SECTION */}
+                    <section className="space-y-4 border-blue-500">
+                        <h3 className="text-lg font-bold text-blue-700 flex items-center gap-2 uppercase tracking-wide">
+                            2. Front-Pointer Implementation (Linear)
+                        </h3>
+                        <p className="text-sm text-slate-600">
+                            Instead of shifting, we simply increment a <strong>Front</strong> pointer. While this is O(1), it creates "Dead Space" at the start of the array that cannot be reused without a manual reset.
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-4">
+                            <div className="bg-blue-50 p-3 rounded border border-blue-100">
+                                <div className="text-[10px] font-bold text-blue-800 uppercase">Enqueue</div>
+                                <div className="text-lg font-mono text-blue-600">O(1)</div>
+                            </div>
+                            <div className="bg-blue-50 p-3 rounded border border-blue-100">
+                                <div className="text-[10px] font-bold text-blue-800 uppercase">Dequeue</div>
+                                <div className="text-lg font-mono text-blue-600">O(1)</div>
+                            </div>
+                            <div className="bg-amber-50 p-3 rounded border border-amber-100">
+                                <div className="text-[10px] font-bold text-amber-800 uppercase">Memory</div>
+                                <div className="text-lg font-mono text-amber-600">Inefficient</div>
+                            </div>
+                        </div>
+
+
+
+                        <div className="bg-slate-900 rounded-lg overflow-hidden shadow-lg">
+                            <div className="bg-slate-800 px-4 py-2 text-xs font-mono text-slate-400">queue_array.py</div>
+                            <div className="p-4 text-sm font-mono leading-relaxed text-slate-300">
+                                <pre>class <span className="text-yellow-400">ArrayQueue</span>:</pre>
+                                <pre>    def <span className="text-blue-400">__init__</span>(self): </pre>
+                                <pre>        self.items = []</pre>
+                                <pre>        self.front = 0</pre>
+                                <br/>
+                                <pre className="text-slate-300">    def <span className="text-blue-400">enqueue</span>(self, item):</pre>
+                                <pre className="text-slate-300">        self.items.append(item)</pre>
+                                <br/>
+                                <pre>    def <span className="text-blue-400">dequeue</span>(self):</pre>
+                                <pre>        if self.front &lt; len(self.items):</pre>
+                                <pre>            val = self.items[self.front]</pre>
+                                <pre className="text-blue-400">            self.front += 1  # Move pointer, don't shift</pre>
+                                <pre>            return val</pre>
+                            </div>
+                        </div>
+
+                    </section>
+
+                    {/* 3. OPTIMIZED SECTION */}
+                    <section className="space-y-4">
+                        <h3 className="text-lg font-bold text-green-700 flex items-center gap-2 uppercase tracking-wide">
+                            3. Optimized Implementation (Deque)
+                        </h3>
+                        <p className="text-sm text-slate-600">
+                            The standard for production Python. It uses a "doubly-linked list of blocks" internally, providing the benefits of both arrays (fast access) and linked lists (fast insertions).
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-4">
+                            <div className="bg-green-50 p-3 rounded border border-green-100">
+                                <div className="text-[10px] font-bold text-green-800 uppercase">Enqueue</div>
+                                <div className="text-lg font-mono text-green-600">O(1)</div>
+                            </div>
+                            <div className="bg-green-50 p-3 rounded border border-green-100">
+                                <div className="text-[10px] font-bold text-green-800 uppercase">Dequeue</div>
+                                <div className="text-lg font-mono text-green-600">O(1)</div>
+                            </div>
+                            <div className="bg-blue-50 p-3 rounded border border-blue-100">
+                                <div className="text-[10px] font-bold text-blue-800 uppercase">Memory</div>
+                                <div className="text-lg font-mono text-blue-600">Efficient</div>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-900 rounded-lg overflow-hidden shadow-lg">
+                            <div className="bg-slate-800 px-4 py-2 flex justify-between items-center border-b border-slate-700">
+                                <span className="text-xs font-mono text-slate-400">queue_array.py</span>
+                            </div>
+                            <div className="p-4 text-sm font-mono leading-relaxed overflow-x-auto">
+                                <pre className="text-purple-400">from <span className="text-slate-300">collections</span> import <span className="text-yellow-400">deque</span></pre>
+                                <br/>
+                                <pre className="text-blue-300">class <span className="text-yellow-400">ArrayQueue</span>:</pre>
+                                <pre className="text-slate-300">    def <span className="text-blue-400">__init__</span>(self):</pre>
+                                <pre className="text-slate-300">        self.items = deque([])</pre>
+                                <br/>
+                                <pre className="text-slate-300">    def <span className="text-blue-400">enqueue</span>(self, item):</pre>
+                                <pre className="text-slate-300">        self.items.append(item)</pre>
+                                <br/>
+                                <pre className="text-slate-300">    def <span className="text-blue-400">dequeue</span>(self):</pre>
+                                <pre className="text-slate-300">        if len(self.items) &gt; 0:</pre>
+                                <pre className="text-slate-300">            return self.items.popleft()</pre>
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+            );
+
+            const renderQueueLinkedImplTab = () => (
+                <div className="space-y-6">
+                    <section>
+                        <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <Icon name="terminal" className="text-green-600"/> Queue Implementation (Linked List)
+                        </h3>
+                        <p className="text-slate-600 mb-4">
+                            In a Linked List queue, we maintain two pointers: <strong>Front</strong> (to remove items) and <strong>Rear</strong> (to add items). This avoids traversal and ensures that every operation is independent of the queue's size.
+                        </p>
+                    </section>
+
+                    <div className="grid grid-cols-1 gap-6">
+                        {/* Code Block */}
+                        <div className="bg-slate-900 rounded-lg overflow-hidden shadow-lg">
+                            <div className="bg-slate-800 px-4 py-2 flex justify-between items-center border-b border-slate-700">
+                                <span className="text-xs font-mono text-slate-400">linked_queue.py</span>
+                            </div>
+                            <div className="p-4 text-sm font-mono leading-relaxed overflow-x-auto">
+                                <pre className="text-blue-300">class <span className="text-yellow-400">Node</span>:</pre>
+                                <pre className="text-slate-300">    def <span className="text-blue-400">__init__</span>(self, data):</pre>
+                                <pre className="text-slate-300">        self.data = data</pre>
+                                <pre className="text-slate-300">        self.next = <span className="text-purple-400">None</span></pre>
+                                <br/>
+                                <pre className="text-blue-300">class <span className="text-yellow-400">LinkedQueue</span>:</pre>
+                                <pre className="text-slate-300">    def <span className="text-blue-400">__init__</span>(self):</pre>
+                                <pre className="text-slate-300">        self.front = self.rear = <span className="text-purple-400">None</span></pre>
+                                <br/>
+                                <pre className="text-slate-300">    def <span className="text-blue-400">enqueue</span>(self, data):</pre>
+                                <pre className="text-slate-300">        new_node = Node(data)</pre>
+                                <pre className="text-slate-300">        if self.rear is <span className="text-purple-400">None</span>:</pre>
+                                <pre className="text-slate-300">            self.front = self.rear = new_node</pre>
+                                <pre className="text-slate-300">            return</pre>
+                                <pre className="text-slate-300">        self.rear.next = new_node</pre>
+                                <pre className="text-slate-300">        self.rear = new_node</pre>
+                                <pre className="text-slate-300">    def <span className="text-blue-400">dequeue</span>(self):</pre>
+                                <pre className="text-slate-300">        if self.front is <span className="text-purple-400">None</span>:</pre>
+                                <pre className="text-slate-300">            return None</pre>
+                                <pre className="text-slate-300">        val = self.front.data</pre>
+                                <pre className="text-slate-300">        self.front = self.front.next</pre>
+                                <pre className="text-slate-300">        return val</pre>
+                            </div>
+                        </div>
+
+                        {/* Analysis Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="p-4 bg-green-50 border border-green-100 rounded-lg">
+                                <h4 className="font-bold text-green-800 text-xs uppercase mb-1">Rear Pointer</h4>
+                                <p className="text-sm text-green-600">Enables O(1) insertion at the end of the list.</p>
+                            </div>
+                            <div className="p-4 bg-purple-50 border border-purple-100 rounded-lg">
+                                <h4 className="font-bold text-purple-800 text-xs uppercase mb-1">Front Pointer</h4>
+                                <p className="text-sm text-purple-600">Enables O(1) removal from the start of the list.</p>
+                            </div>
+                            <div className="p-4 bg-slate-100 border border-slate-200 rounded-lg">
+                                <h4 className="font-bold text-slate-800 text-xs uppercase mb-1">Memory</h4>
+                                <p className="text-sm text-slate-600">Nodes are deleted immediately after dequeue.</p>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div className="bg-green-50 p-4 rounded border-l-4 border-green-500 text-sm text-green-800">
+                        <strong>Key Concept:</strong> The <strong>Rear</strong> pointer is the "secret sauce" of the Linked Queue. Without it, we would have to traverse the entire list to find the end, making Enqueue an <strong>O(n)</strong> operation.
+                    </div>
+                </div>
+            );
+
+            const renderStackComparisonTab = () => (
+                <div className="space-y-8">
+                    <section>
+                        <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <Icon name="git-compare" className="text-blue-600"/><Icon name="clock" size={14}/> Stack: Big O Complexity Analysis
+                        </h3>
+                    </section>
+
+                    {/* Big O Table */}
+                    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                        <table className="w-full text-left text-sm font-mono">
+                            <thead className="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th className="px-6 py-4 font-bold text-slate-700 font-sans">Operation</th>
+                                    <th className="px-6 py-4 font-bold text-blue-700 font-sans">Array-Based (Python List)</th>
+                                    <th className="px-6 py-4 font-bold text-purple-700 font-sans">Linked List-Based</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                <tr>
+                                    <td className="px-6 py-4 font-bold text-slate-800 font-sans bg-slate-50/30">Push</td>
+                                    <td className="px-6 py-4">O(1)* <span className="text-[10px] font-sans text-slate-400 font-normal ml-2">(Amortized)</span></td>
+                                    <td className="px-6 py-4 text-purple-600 font-bold">O(1)</td>
+                                </tr>
+                                <tr>
+                                    <td className="px-6 py-4 font-bold text-slate-800 font-sans bg-slate-50/30">Pop</td>
+                                    <td className="px-6 py-4">O(1)</td>
+                                    <td className="px-6 py-4 text-purple-600 font-bold">O(1)</td>
+                                </tr>
+                                <tr>
+                                    <td className="px-6 py-4 font-bold text-slate-800 font-sans bg-slate-50/30">Peek</td>
+                                    <td className="px-6 py-4">O(1)</td>
+                                    <td className="px-6 py-4 text-purple-600 font-bold">O(1)</td>
+                                </tr>
+                                <tr>
+                                    <td className="px-6 py-4 font-bold text-slate-800 font-sans bg-slate-50/30">Space Complexity</td>
+                                    <td className="px-6 py-4 text-blue-600 font-bold">O(n)</td>
+                                    <td className="px-6 py-4 text-purple-600 font-bold">O(n)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    
+
+                    {/* Critical Complexity Notes */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
+                            <h4 className="text-xs font-bold text-amber-800 uppercase mb-2">The Array (*) Asterisk</h4>
+                            <p className="text-xs text-amber-700 leading-relaxed">
+                                Array <code>Push</code> is <strong>O(1) amortized</strong>. When the underlying dynamic array fills up, it triggers a resize (O(n)). For almost all cases, this is negligible, but it prevents "Hard Real-Time" guarantees.
+                            </p>
+                        </div>
+                        <div className="p-4 bg-slate-100 rounded-lg border border-slate-200">
+                            <h4 className="text-xs font-bold text-slate-800 uppercase mb-2">Space Overhead</h4>
+                            <p className="text-xs text-slate-600 leading-relaxed">
+                                While both are <strong>O(n) space</strong>, the Linked List has a higher constant factor because it must store a reference/pointer (typically 8 bytes) for every single data element.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderQueueComparisonTab = () => (
+                <div className="space-y-8">
+                    <section>
+                        <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <Icon name="git-compare" className="text-green-600"/> <Icon name="clock" size={14}/> Queue: Big O Complexity Analysis
+                        </h3>
+                    </section>
+
+                    {/* Big O Table */}
+                    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                        <table className="w-full text-left text-sm font-mono">
+                            <thead className="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th className="px-6 py-4 font-bold text-slate-700 font-sans">Operation</th>
+                                    <th className="px-6 py-4 font-bold text-red-600 font-sans">Array (Naive)</th>
+                                    <th className="px-6 py-4 font-bold text-green-600 font-sans">Array (Deque)</th>
+                                    <th className="px-6 py-4 font-bold text-purple-600 font-sans">Linked List</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                <tr>
+                                    <td className="px-6 py-4 font-bold text-slate-800 font-sans bg-slate-50/30">Enqueue</td>
+                                    <td className="px-6 py-4">O(1)</td>
+                                    <td className="px-6 py-4 font-bold">O(1)</td>
+                                    <td className="px-6 py-4 font-bold">O(1)</td>
+                                </tr>
+                                <tr>
+                                    <td className="px-6 py-4 font-bold text-slate-800 font-sans bg-slate-50/30">Dequeue</td>
+                                    <td className="px-6 py-4 text-red-600 font-black">O(n)</td>
+                                    <td className="px-6 py-4 font-bold">O(1)</td>
+                                    <td className="px-6 py-4 font-bold">O(1)</td>
+                                </tr>
+                                <tr>
+                                    <td className="px-6 py-4 font-bold text-slate-800 font-sans bg-slate-50/30">Space Complexity</td>
+                                    <td className="px-6 py-4">O(n)</td>
+                                    <td className="px-6 py-4 font-bold">O(n)</td>
+                                    <td className="px-6 py-4 font-bold">O(n)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    
+
+                    {/* Analysis Insight */}
+                    <div className="bg-slate-900 p-5 rounded-lg border-l-4 border-green-500">
+                        <h4 className="text-green-400 font-bold text-xs uppercase mb-2">Performance Summary</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-300">
+                            <p>
+                                <strong>Naive Array:</strong> Inefficient because <code>pop(0)</code> forces an element shift. As <i>n</i> grows, performance degrades linearly.
+                            </p>
+                            <p>
+                                <strong>Deque / Linked List:</strong> Both provide true <strong>O(1)</strong> front removal. Deque is generally faster in practice due to better utilization of CPU cache lines.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+
+
+            return (
+                <div className="flex h-screen overflow-hidden">
+                    <div className="w-75 bg-slate-900 text-slate-300 flex flex-col shadow-xl z-10">
+                        <div className="p-6 border-b border-slate-800">
+                            <h1 className="text-xl font-bold text-white tracking-tight">Stacks and Queues</h1>
+                            <p className="text-xs text-slate-500 mt-1">01526121 Data Structures and Algorithms</p>
+                            <p className="text-xs text-slate-500 mt-1">Generated by Gemini, Google. (31 January 2026)</p>
+                            <p className="text-xs text-slate-500 mt-1">Edited by Wissanupong Chanliem and Boonsita Jongklom, TA</p>
+                        </div>
+                        <nav className="flex-1 p-4 space-y-2">
+                            {[
+                                { id: 'basic', label: '1. Stack and Queue Basic', icon: 'layers' },
+                                { id: 'stack', label: '2. Stack (LIFO)', icon: 'layers' },
+                                { id: 'Stack implementation (Array)', label: '3. Stack implementation (Array)', icon: 'terminal' },
+                                { id: 'Stack implementation (Linked List)', label: '4. Stack implementation (Linked List)', icon: 'terminal' },
+                                { id: 'Comparison of Array and Linked List (Stack)', label: '5. Array vs Linked List (Stack)', icon: 'compare' },
+                                { id: 'queue', label: '6. Queue (FIFO)', icon: 'layers' },
+                                { id: 'Queue implementation (Array)', label: '7. Queue implementation (Array)', icon: 'terminal' },
+                                { id: 'Queue implementation (Linked List)', label: '8. Queue implementation (Linked List)', icon: 'terminal' },
+                                { id: 'Comparison of Array and Linked List (Queue)', label: '9. Array vs Linked List (Queue)', icon: 'compare' }
+                            ].map(item => (
+                                <button key={item.id} onClick={() => setActiveTab(item.id)}
+                                    className={`w-full text-left px-4 py-3 rounded transition-colors flex items-center gap-3 ${activeTab === item.id ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}>
+                                    <Icon name={item.icon} size={18} /> {item.label}
+                                </button>
+                            ))}
+                        </nav>
+                    </div>
+
+                    <div className="flex-1 flex flex-col relative">
+                        <header className="bg-white border-b border-slate-200 p-6 flex justify-between items-center">
+                            <h2 className="text-2xl font-bold text-slate-800 capitalize">{activeTab}</h2>
+                            <div className="text-sm bg-slate-100 px-3 py-1 rounded text-slate-600">Size: {data.length} (Max: 10)</div>
+                        </header>
+
+                        <div className={`${contentOnly.includes(activeTab) ? "hidden" : ""} flex-1 bg-slate-50 p-5 flex ${activeTab === 'stack' ? (data.length === 0 ? "items-center" : "items-start"):""} justify-center overflow-x-auto  list-container`}>
+                            <div className={`flex ${activeTab === 'stack' ? 'flex-col-reverse' : 'flex-row'} gap-2 items-center`}>
+                                {data.map((val, i) => (
+                                    <div key={i} className={`
+                                        node-enter flex shadow-lg rounded-lg overflow-hidden border-2 border-slate-300 bg-white
+                                        ${i === removingIndex ? 'node-exit' : ''}
+                                    `}>
+                                        <div className="p-4 w-20 flex flex-col items-center">
+                                            <span className="text-[10px] text-slate-400 uppercase font-bold">{activeTab === 'stack' ? (i === data.length - 1 ? 'Top' : 'Data') : (i === 0 ? 'Front' : 'Data')}</span>
+                                            <span className="text-lg font-bold text-slate-800">{val}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                                {data.length === 0 && <div className="text-slate-400 italic">Empty Structure</div>}
+                            </div>
+                        </div>
+
+                        <div className={(contentOnly.includes(activeTab) ? "h-full" : "h-3/5") + " bg-white border-t border-slate-200 flex flex-col md:flex-row overflow-hidden"}>
+                            <div className="flex-1 p-6 overflow-y-auto border-r border-slate-100" ref={content}>
+                                {activeTab === 'basic' && renderBasicTab()}
+                                {activeTab === 'stack' && renderStackTab()}
+                                {activeTab === 'Stack implementation (Array)' && renderStackArrayImplTab()}
+                                {activeTab === 'Stack implementation (Linked List)' && renderStackLinkedImplTab()}
+                                {activeTab === 'queue' && renderQueueTab()}
+                                {activeTab === 'Queue implementation (Array)' && renderQueueArrayImplTab()}
+                                {activeTab === 'Queue implementation (Linked List)' && renderQueueLinkedImplTab()}
+                                {activeTab === 'Comparison of Array and Linked List (Stack)' && renderStackComparisonTab()}
+                                {activeTab === 'Comparison of Array and Linked List (Queue)' && renderQueueComparisonTab()}
+                            </div>
+                            <div className="w-full md:w-80 bg-slate-900 text-slate-300 p-4 font-mono text-xs overflow-y-auto">
+                                <div className="font-bold text-slate-500 mb-2 uppercase border-b border-slate-700 pb-1 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Icon name="terminal" size={14}/>
+                                        System Log
+                                    </div>
+                                    {/* Clear Button */}
+                                    <button
+                                        onClick={() => setLogs([])}
+                                        className="text-[10px] bg-slate-800 hover:bg-slate-700 hover:text-white px-2 py-0.5 rounded transition-colors border border-slate-700"
+                                    >
+                                        Clear
+                                    </button>
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    {logs.map((l, i) => (
+                                        <div key={i} className="border-l-2 border-blue-500 pl-2 py-0.5 text-blue-100 opacity-80 animate-in fade-in slide-in-from-left-2 duration-300">
+                                            {l}
+                                        </div>
+                                    ))}
+                                    {logs.length === 0 && (
+                                        <div className="text-slate-600 italic mt-2 text-center">No logs recorded</div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
