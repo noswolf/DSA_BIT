@@ -21,7 +21,7 @@ Urgency Contact: sirasit.lo@kmitl.ac.th
 |Week 08| 12/01/2026 |  No class (due to Commencement Ceremony) | |  
 |Week --| 20/01/2026 | Mid-term | |  
 |Week 09| 26/01/2026 | [Week9_Linked_List](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week8/DSA_Week8.pdf) <br> [Linked List](https://noswolf.github.io/DSA_BIT/Week8/Linked_list_guide.html) | [#6 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week8/DSA_Lab_6_student.ipynb) |   
-|Week 10| 02/02/2026 | [Week10_Stacks_and_Queues] <br> [Stack & Queue](https://noswolf.github.io/DSA_BIT/Week8/stack_queue_guide.html) | [#7 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week9/DSA_Lab_7_student.ipynb) |  
+|Week 10| 02/02/2026 | [Week10_Stacks_and_Queues] <br> [Stack & Queue](https://noswolf.github.io/DSA_BIT/Week9/stack_queue_guide.html) | [#7 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week9/DSA_Lab_7_student.ipynb) |  
 |Week 11| 09/02/2026 | [Week11_Trees] | [#8 Lab] |    
 |Week 12| 16/02/2026 | [Week12_Search_Trees] | [#9 Lab] | 
 |Week 13| 23/02/2026 | [Week13_Graphs] |  [#10 Lab] |  
