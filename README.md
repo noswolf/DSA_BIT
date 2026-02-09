@@ -22,7 +22,7 @@ Urgency Contact: sirasit.lo@kmitl.ac.th
 |Week --| 20/01/2026 | Mid-term | |  
 |Week 09| 26/01/2026 | [Week9_Linked_List](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week8/DSA_Week8.pdf) <br> [Linked List](https://noswolf.github.io/DSA_BIT/Week8/Linked_list_guide.html) | [#6 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week8/DSA_Lab_6_student.ipynb) |   
 |Week 10| 02/02/2026 | [Week10_Stacks_and_Queues] <br> [Doubly Linked List](https://noswolf.github.io/DSA_BIT/Week9/Doubly_LL_guide.html) <br> [Stack & Queue](https://noswolf.github.io/DSA_BIT/Week9/stack_queue_guide.html) | [#7 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week9/DSA_Lab_7_student.ipynb) |  
-|Week 11| 09/02/2026 | [Week11_Trees] <br> [Binary Tree Traversals](https://noswolf.github.io/DSA_BIT/Week10/Tree_traversals.html)| [#8 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week10/DSA_Lab_8_student.ipynb) |    
+|Week 11| 09/02/2026 | [Week11_Trees](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week10/DSA_Week10.pdf) <br> [Binary Tree Traversals](https://noswolf.github.io/DSA_BIT/Week10/Tree_traversals.html)| [#8 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week10/DSA_Lab_8_student.ipynb) |    
 |Week 12| 16/02/2026 | [Week12_Search_Trees] | [#9 Lab] | 
 |Week 13| 23/02/2026 | [Week13_Graphs] |  [#10 Lab] |  
 |Week 14| 02/03/2026 | [Week14_Graph_Algorithms] | [#10 Lab] |  
