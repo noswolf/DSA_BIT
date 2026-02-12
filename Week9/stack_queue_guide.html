@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>01526121 Data Structures: Stacks & Queues (Python)</title>
+    <title>01526121 DSA: Stacks & Queues (Python)</title>
 
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -84,7 +84,7 @@
             const [logs, setLogs] = useState(["Welcome to the Stack & Queue module."]);
             const [removingIndex, setRemovingIndex] = useState(null);
             const content = useRef(null);
-            const stackLimit = 10;
+            const stackLimit = 9;
 
             const contentOnly = [
                 "basic",
@@ -550,51 +550,65 @@
 
                     </section>
 
-                    {/* 3. OPTIMIZED SECTION */}
+                    {/* 3. CIRCULAR QUEUE SECTION */}
                     <section className="space-y-4">
-                        <h3 className="text-lg font-bold text-green-700 flex items-center gap-2 uppercase tracking-wide">
-                            3. Optimized Implementation (Deque)
+                        <h3 className="text-lg font-bold text-purple-700 flex items-center gap-2 uppercase tracking-wide">
+                            3. Circular Queue (Modulo & Resize)
                         </h3>
                         <p className="text-sm text-slate-600">
-                            The standard for production Python. It uses a "doubly-linked list of blocks" internally, providing the benefits of both arrays (fast access) and linked lists (fast insertions).
+                            This approach use shifting of front pointer to efficiently implement "dequeue" and wraps the <strong>Rear</strong> pointers back to index 0 using modulo arithmetic to make use of "Dead Space" create by dequeue. When full, the rear pointer loop back and met with the front pointer, the array is copy into a new array with larger space in the correct order.
                         </p>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-4">
-                            <div className="bg-green-50 p-3 rounded border border-green-100">
-                                <div className="text-[10px] font-bold text-green-800 uppercase">Enqueue</div>
-                                <div className="text-lg font-mono text-green-600">O(1)</div>
+                            <div className="bg-purple-50 p-3 rounded border border-purple-100">
+                                <div className="text-[10px] font-bold text-purple-800 uppercase">Enqueue</div>
+                                <div className="text-lg font-mono text-purple-600">O(1)*</div>
                             </div>
-                            <div className="bg-green-50 p-3 rounded border border-green-100">
-                                <div className="text-[10px] font-bold text-green-800 uppercase">Dequeue</div>
-                                <div className="text-lg font-mono text-green-600">O(1)</div>
+                            <div className="bg-purple-50 p-3 rounded border border-purple-100">
+                                <div className="text-[10px] font-bold text-purple-800 uppercase">Dequeue</div>
+                                <div className="text-lg font-mono text-purple-600">O(1)</div>
                             </div>
-                            <div className="bg-blue-50 p-3 rounded border border-blue-100">
-                                <div className="text-[10px] font-bold text-blue-800 uppercase">Memory</div>
-                                <div className="text-lg font-mono text-blue-600">Efficient</div>
+                            <div className="bg-purple-50 p-3 rounded border border-purple-100">
+                                <div className="text-[10px] font-bold text-purple-800 uppercase">Space</div>
+                                <div className="text-lg font-mono text-purple-600">Optimized</div>
                             </div>
                         </div>
 
+                        
+
                         <div className="bg-slate-900 rounded-lg overflow-hidden shadow-lg">
-                            <div className="bg-slate-800 px-4 py-2 flex justify-between items-center border-b border-slate-700">
-                                <span className="text-xs font-mono text-slate-400">queue_array.py</span>
-                            </div>
-                            <div className="p-4 text-sm font-mono leading-relaxed overflow-x-auto">
-                                <pre className="text-purple-400">from <span className="text-slate-300">collections</span> import <span className="text-yellow-400">deque</span></pre>
+                            <div className="bg-slate-800 px-4 py-2 text-xs font-mono text-slate-400">circular_resize_queue.py</div>
+                            <div className="p-4 text-sm font-mono leading-relaxed text-slate-300">
+                                <pre>class <span className="text-yellow-400">ArrayQueue</span>:</pre>
+                                <pre>    def <span className="text-blue-400">__init__</span>(self, capacity=4):</pre>
+                                <pre>        self.items = [None] * capacity</pre>
+                                <pre>        self.front = 0</pre>
+                                <pre>        self.size = 0</pre>
                                 <br/>
-                                <pre className="text-blue-300">class <span className="text-yellow-400">ArrayQueue</span>:</pre>
-                                <pre className="text-slate-300">    def <span className="text-blue-400">__init__</span>(self):</pre>
-                                <pre className="text-slate-300">        self.items = deque([])</pre>
+                                <pre>    def <span className="text-blue-400">enqueue</span>(self, val):</pre>
+                                <pre>        if self.size == len(self.items):</pre>
+                                <pre className="text-purple-400">            self._resize(len(self.items) * 2) // resize the list to two times the current capacity</pre>
+                                <pre className="text-purple-400 text-break">        rear = (self.front + self.size) % len(self.items) // rear pointer will loop back to 0 when it exceed the last index of the list)</pre>
+                                <pre>        self.items[rear] = val</pre>
+                                <pre>        self.size += 1</pre>
                                 <br/>
-                                <pre className="text-slate-300">    def <span className="text-blue-400">enqueue</span>(self, item):</pre>
-                                <pre className="text-slate-300">        self.items.append(item)</pre>
+                                <pre>    def <span className="text-blue-400">dequeue</span>(self):</pre>
+                                <pre>        if self.size == 0: return None</pre>
+                                <pre>        val = self.items[self.front]</pre>
+                                <pre>        self.items[self.front] = None</pre>
+                                <pre className="text-purple-400">        self.front = (self.front + 1) % len(self.items) // shift the front pointer to dequeue</pre>
+                                <pre>        self.size -= 1</pre>
+                                <pre>        return val</pre>
                                 <br/>
-                                <pre className="text-slate-300">    def <span className="text-blue-400">dequeue</span>(self):</pre>
-                                <pre className="text-slate-300">        if len(self.items) &gt; 0:</pre>
-                                <pre className="text-slate-300">            return self.items.popleft()</pre>
+                                <pre>    def <span className="text-blue-400">_resize</span>(self, new_cap):</pre>
+                                <pre>        new_arr = [None] * new_cap</pre>
+                                <pre>        for i in range(self.size):</pre>
+                                <pre className="text-purple-400">            new_arr[i] = self.items[(self.front + i) % len(self.items)]</pre>
+                                <pre>        self.items = new_arr</pre>
+                                <pre>        self.front = 0</pre>
                             </div>
                         </div>
                     </section>
-
                 </div>
             );
 
@@ -744,7 +758,7 @@
                                 <tr>
                                     <th className="px-6 py-4 font-bold text-slate-700 font-sans">Operation</th>
                                     <th className="px-6 py-4 font-bold text-red-600 font-sans">Array (Naive)</th>
-                                    <th className="px-6 py-4 font-bold text-green-600 font-sans">Array (Deque)</th>
+                                    <th className="px-6 py-4 font-bold text-green-600 font-sans">Array (Circular Queue)</th>
                                     <th className="px-6 py-4 font-bold text-purple-600 font-sans">Linked List</th>
                                 </tr>
                             </thead>
@@ -781,7 +795,7 @@
                                 <strong>Naive Array:</strong> Inefficient because <code>pop(0)</code> forces an element shift. As <i>n</i> grows, performance degrades linearly.
                             </p>
                             <p>
-                                <strong>Deque / Linked List:</strong> Both provide true <strong>O(1)</strong> front removal. Deque is generally faster in practice due to better utilization of CPU cache lines.
+                                <strong>Array-based Circular Queue & Linked List:</strong> Both provide true <strong>O(1)</strong> front removal.
                             </p>
                         </div>
                     </div>
@@ -793,10 +807,13 @@
                 <div className="flex h-screen overflow-hidden">
                     <div className="w-75 bg-slate-900 text-slate-300 flex flex-col shadow-xl z-10">
                         <div className="p-6 border-b border-slate-800">
-                            <h1 className="text-xl font-bold text-white tracking-tight">Stacks and Queues</h1>
-                            <p className="text-xs text-slate-500 mt-1">01526121 Data Structures and Algorithms</p>
+                            <div className="flex items-center gap-2 mb-2 text-white">
+                                <h1 className="text-xl font-bold text-white tracking-tight">Stacks and Queues</h1>
+                            </div>
+                            <p className="text-xs text-slate-500 font-medium">01526121 Data Structures and Algorithms</p>
                             <p className="text-xs text-slate-500 mt-1">Generated by Gemini, Google. (31 January 2026)</p>
                             <p className="text-xs text-slate-500 mt-1">Edited by Wissanupong Chanliem and Boonsita Jongklom, TA</p>
+                            <p className="text-xs text-slate-500 mt-1">Instructor: Dr. Sirasit Lochanachit, IT KMITL</p>
                         </div>
                         <nav className="flex-1 p-4 space-y-2">
                             {[
@@ -818,64 +835,65 @@
                         </nav>
                     </div>
 
-                    <div className="flex-1 flex flex-col relative">
+                    <div className="flex-1 flex flex-col relative h-screen">
                         <header className="bg-white border-b border-slate-200 p-6 flex justify-between items-center">
                             <h2 className="text-2xl font-bold text-slate-800 capitalize">{activeTab}</h2>
-                            <div className="text-sm bg-slate-100 px-3 py-1 rounded text-slate-600">Size: {data.length} (Max: 10)</div>
+                            <div className="text-sm bg-slate-100 px-3 py-1 rounded text-slate-600">Size: {data.length} (Max: {stackLimit})</div>
                         </header>
-
-                        <div className={`${contentOnly.includes(activeTab) ? "hidden" : ""} flex-1 bg-slate-50 p-5 flex ${activeTab === 'stack' ? (data.length === 0 ? "items-center" : "items-start"):""} justify-center overflow-x-auto  list-container`}>
-                            <div className={`flex ${activeTab === 'stack' ? 'flex-col-reverse' : 'flex-row'} gap-2 items-center`}>
-                                {data.map((val, i) => (
-                                    <div key={i} className={`
-                                        node-enter flex shadow-lg rounded-lg overflow-hidden border-2 border-slate-300 bg-white
-                                        ${i === removingIndex ? 'node-exit' : ''}
-                                    `}>
-                                        <div className="p-4 w-20 flex flex-col items-center">
-                                            <span className="text-[10px] text-slate-400 uppercase font-bold">{activeTab === 'stack' ? (i === data.length - 1 ? 'Top' : 'Data') : (i === 0 ? 'Front' : 'Data')}</span>
-                                            <span className="text-lg font-bold text-slate-800">{val}</span>
-                                        </div>
-                                    </div>
-                                ))}
-                                {data.length === 0 && <div className="text-slate-400 italic">Empty Structure</div>}
-                            </div>
-                        </div>
-
-                        <div className={(contentOnly.includes(activeTab) ? "h-full" : "h-3/5") + " bg-white border-t border-slate-200 flex flex-col md:flex-row overflow-hidden"}>
-                            <div className="flex-1 p-6 overflow-y-auto border-r border-slate-100" ref={content}>
-                                {activeTab === 'basic' && renderBasicTab()}
-                                {activeTab === 'stack' && renderStackTab()}
-                                {activeTab === 'Stack implementation (Array)' && renderStackArrayImplTab()}
-                                {activeTab === 'Stack implementation (Linked List)' && renderStackLinkedImplTab()}
-                                {activeTab === 'queue' && renderQueueTab()}
-                                {activeTab === 'Queue implementation (Array)' && renderQueueArrayImplTab()}
-                                {activeTab === 'Queue implementation (Linked List)' && renderQueueLinkedImplTab()}
-                                {activeTab === 'Comparison of Array and Linked List (Stack)' && renderStackComparisonTab()}
-                                {activeTab === 'Comparison of Array and Linked List (Queue)' && renderQueueComparisonTab()}
-                            </div>
-                            <div className="w-full md:w-80 bg-slate-900 text-slate-300 p-4 font-mono text-xs overflow-y-auto">
-                                <div className="font-bold text-slate-500 mb-2 uppercase border-b border-slate-700 pb-1 flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Icon name="terminal" size={14}/>
-                                        System Log
-                                    </div>
-                                    {/* Clear Button */}
-                                    <button
-                                        onClick={() => setLogs([])}
-                                        className="text-[10px] bg-slate-800 hover:bg-slate-700 hover:text-white px-2 py-0.5 rounded transition-colors border border-slate-700"
-                                    >
-                                        Clear
-                                    </button>
-                                </div>
-                                <div className="flex flex-col gap-1">
-                                    {logs.map((l, i) => (
-                                        <div key={i} className="border-l-2 border-blue-500 pl-2 py-0.5 text-blue-100 opacity-80 animate-in fade-in slide-in-from-left-2 duration-300">
-                                            {l}
+                        <div className={`flex ${activeTab === 'stack' ? "flex-row ":"flex-col "}  h-full  relative`}>
+                            <div className={`${contentOnly.includes(activeTab) ? "hidden" : ""} flex-1 bg-slate-50 p-5 flex ${activeTab === 'stack' ? (data.length === 0 ? "items-center" : "items-start") + " w-1/4" :"" } justify-center overflow-x-auto  list-container`}>
+                                <div className={`flex ${activeTab === 'stack' ? 'flex-col-reverse' : 'flex-row'} gap-2 items-center`}>
+                                    {data.map((val, i) => (
+                                        <div key={i} className={`
+                                            node-enter flex shadow-lg rounded-lg overflow-hidden border-2 border-slate-300 bg-white
+                                            ${i === removingIndex ? 'node-exit' : ''}
+                                        `}>
+                                            <div className="p-4 w-20 flex flex-col items-center">
+                                                <span className="text-[10px] text-slate-400 uppercase font-bold">{activeTab === 'stack' ? (i === data.length - 1 ? 'Top' : 'Data') : (i === 0 ? 'Front' : 'Data')}</span>
+                                                <span className="text-lg font-bold text-slate-800">{val}</span>
+                                            </div>
                                         </div>
                                     ))}
-                                    {logs.length === 0 && (
-                                        <div className="text-slate-600 italic mt-2 text-center">No logs recorded</div>
-                                    )}
+                                    {data.length === 0 && <div className="text-slate-400 italic">Empty Structure</div>}
+                                </div>
+                            </div>
+
+                            <div className={(contentOnly.includes(activeTab) || activeTab === 'stack'  ? "h-full" : "h-3/5") + ` ${activeTab === 'stack' ? "w-3/4":""}` + " overflow-y-auto bg-white border border-t border-slate-200 flex flex-col md:flex-row overflow-hidden"} style={{maxHeight:"calc(100vh - 81px)"}}>
+                                <div className="flex-1 p-6 overflow-y-auto border-r border-slate-100 " style={{maxHeight:"calc(100vh - 81px)"}} ref={content}>
+                                    {activeTab === 'basic' && renderBasicTab()}
+                                    {activeTab === 'stack' && renderStackTab()}
+                                    {activeTab === 'Stack implementation (Array)' && renderStackArrayImplTab()}
+                                    {activeTab === 'Stack implementation (Linked List)' && renderStackLinkedImplTab()}
+                                    {activeTab === 'queue' && renderQueueTab()}
+                                    {activeTab === 'Queue implementation (Array)' && renderQueueArrayImplTab()}
+                                    {activeTab === 'Queue implementation (Linked List)' && renderQueueLinkedImplTab()}
+                                    {activeTab === 'Comparison of Array and Linked List (Stack)' && renderStackComparisonTab()}
+                                    {activeTab === 'Comparison of Array and Linked List (Queue)' && renderQueueComparisonTab()}
+                                </div>
+                                <div className="w-full md:w-80 bg-slate-900 text-slate-300 p-4 font-mono text-xs overflow-y-auto">
+                                    <div className="font-bold text-slate-500 mb-2 uppercase border-b border-slate-700 pb-1 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <Icon name="terminal" size={14}/>
+                                            System Log
+                                        </div>
+                                        {/* Clear Button */}
+                                        <button
+                                            onClick={() => setLogs([])}
+                                            className="text-[10px] bg-slate-800 hover:bg-slate-700 hover:text-white px-2 py-0.5 rounded transition-colors border border-slate-700"
+                                        >
+                                            Clear
+                                        </button>
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                        {logs.map((l, i) => (
+                                            <div key={i} className="border-l-2 border-blue-500 pl-2 py-0.5 text-blue-100 opacity-80 animate-in fade-in slide-in-from-left-2 duration-300">
+                                                {l}
+                                            </div>
+                                        ))}
+                                        {logs.length === 0 && (
+                                            <div className="text-slate-600 italic mt-2 text-center">No logs recorded</div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
