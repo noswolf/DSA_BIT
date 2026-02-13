@@ -20,10 +20,10 @@ Urgency Contact: sirasit.lo@kmitl.ac.th
 |Week 07| 05/01/2026 |  [Week7_Sorting](https://github.com/noswolf/DSA_BIT/blob/DSA_24_Term2/Week10/DSA_Week10.pdf) | [Sorting Algorithms](https://noswolf.github.io/DSA_BIT/Week7/Sorting_Interactive_Guide.html)| [#5 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week7/DSA_Lab_5_student.ipynb) <br>[#3 Challenge](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week7/DSA_Lab_5_challenge.ipynb)|  
 |Week 08| 12/01/2026 |  No class (due to Commencement Ceremony) | |  
 |Week --| 20/01/2026 | Mid-term | |  
-|Week 09| 26/01/2026 | [Week9_Linked_List](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week8/DSA_Week8.pdf) | [Linked List](https://noswolf.github.io/DSA_BIT/Week8/Linked_list_guide.html) | [#6 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week8/DSA_Lab_6_student.ipynb) |   
-|Week 10| 02/02/2026 | | [Doubly Linked List](https://noswolf.github.io/DSA_BIT/Week9/Doubly_LL_guide.html) <br> [Stack & Queue](https://noswolf.github.io/DSA_BIT/Week9/stack_queue_guide.html) | [#7 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week9/DSA_Lab_7_student.ipynb) |  
-|Week 11| 09/02/2026 | [Week11_Trees](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week10/DSA_Week10.pdf) | [Binary Tree Traversals](https://noswolf.github.io/DSA_BIT/Week10/Tree_traversals.html)| [#8 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week10/DSA_Lab_8_student.ipynb) |    
-|Week 12| 16/02/2026 | [Week12_Search_Trees] | - | [#9 Lab] | 
+|Week 09| 26/01/2026 | [Week9_Linked_List](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week9/DSA_Week9.pdf) | [Linked List](https://noswolf.github.io/DSA_BIT/Week9/Linked_list_guide.html) | [#6 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week9/DSA_Lab_6_student.ipynb) |   
+|Week 10| 02/02/2026 | | [Doubly Linked List](https://noswolf.github.io/DSA_BIT/Week10/Doubly_LL_guide.html) <br> [Stack & Queue](https://noswolf.github.io/DSA_BIT/Week10/stack_queue_guide.html) | [#7 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week10/DSA_Lab_7_student.ipynb) |  
+|Week 11| 09/02/2026 | [Week11_Trees](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week11/DSA_Week11.pdf) | [Binary Tree Traversals](https://noswolf.github.io/DSA_BIT/Week11/Tree_traversals.html)| [#8 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week11/DSA_Lab_8_student.ipynb) |    
+|Week 12| 16/02/2026 | [Week12_Search_Trees] | - | [#9 Lab](https://github.com/noswolf/DSA_BIT/blob/DSA_25/Week12/DSA_Lab_9_student.ipynb) | 
 |Week 13| 23/02/2026 | [Week13_Graph_Algorithms] | - | [#10 Lab] |  
 |Week 14| 02/03/2026 | No class (Unofficial Bridge Holiday) | - |  - |
 |Week 15| 09/03/2026 | No class | - | - |
