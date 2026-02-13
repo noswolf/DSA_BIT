@@ -4,7 +4,7 @@ This repo consists of teaching materials (lectures and code examples) for BIT, I
 
 ## Interactive Guides
 
-[Tree Traversals](https://noswolf.github.io/DSA_BIT/Week10/Tree_traversals.html)
+[Tree Traversals](https://noswolf.github.io/DSA_BIT/Week11/Tree_traversals.html)
 
 ## Course Outlines
 |Week| Date | Lecture Slides|Code Examples|Individual Assignments|
