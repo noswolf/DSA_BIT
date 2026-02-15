@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BST Operations Lab: Search, Insert, Delete</title>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; }
+        .node-enter { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .stack-enter { animation: slideIn 0.3s ease-out forwards; }
+        @keyframes slideIn {
+            0% { transform: translateX(-10px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        .highlight-line { background-color: #fef08a; border-left: 4px solid #ca8a04; width: 100%; display: inline-block; }
+        .code-container {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.75rem;
+            line-height: 1.25;
+        }
+
+        .tree-bg {
+            background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+
+        /* Custom scrollbar for better look */
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Icons ---
+        const Icon = ({ name, size = 18 }) => {
+            const icons = {
+                play: <polygon points="5 3 19 12 5 21 5 3"></polygon>,
+                pause: <rect x="6" y="4" width="4" height="16"></rect>,
+                refresh: <path d="M23 4v6h-6M1 20v-6h6"></path>,
+                code: <polyline points="16 18 22 12 16 6"></polyline>,
+                search: <circle cx="11" cy="11" r="8"></circle>,
+                plus: <line x1="12" y1="5" x2="12" y2="19"></line>,
+                trash: <polyline points="3 6 5 6 21 6"></polyline>,
+                info: <circle cx="12" cy="12" r="10"></circle>,
+                tree: <path d="M12 2L19 12H15V22H9V12H5L12 2Z" />
+            };
+            return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{icons[name] || icons.info}</svg>;
+        };
+
+        // --- Code Snippets ---
+        const SNIPPETS = {
+            node: `class BSTNode:
+    def __init__(self, key, value=None):
+        self.key = key       # Sorting Key
+        self.value = value   # Data Payload
+        self.left = None     # Left Child (key < self.key)
+        self.right = None    # Right Child (key > self.key)
+        self.parent = None   # Optional: Parent Reference`,
+
+            search: `def search(root, target):
+    if root is None:                 # Base Case: Not Found
+        return None
+    if root.key == target:           # Target Found
+        return root
+    if target < root.key:            # Search Left Subtree
+        return search(root.left, target)
+    else:                            # Search Right Subtree
+        return search(root.right, target)`,
+
+            min: `def findMin(root):
+    if root.left is None:
+        return root
+    return findMin(root.left)`,
+
+            max: `def findMax(root):
+    if root.right is None:
+        return root
+    return findMax(root.right)`,
+
+            insert: `def insert(root, key):
+    if root is None:         # Found empty spot
+        root = BSTNode(key)  # Create new node and return it to be linked by parent
+        return root             
+    if key < root.key:       # Go Left
+        root.left = insert(root.left, key)
+    elif key > root.key:     # Go Right
+        root.right = insert(root.right, key)
+    return root              # Return unchanged root node for parent linking`,
+
+            delete: `def delete(root, key):
+    if root is None:                        # Empty/Not Found
+        return root                         
+    if key < root.key:                      # Go Left                       
+        root.left = delete(root.left, key)
+    elif key > root.key:                    # Go Right
+        root.right = delete(root.right, key)
+    else:                                   # Found Node to Delete           
+        # Case 0: No Children
+        if root.left is None and root.right is None:  
+            return None            
+        # Case 1: One Child
+        elif root.left is None:         # Case 1.1: No Left Child, only Right Child
+            return root.right
+        elif root.right is None:        # Case 1.2: No Right Child, only Left Child
+            return root.left
+        # Case 2: Two Children
+        else:
+            temp = findMin(root.right)       # Find Successor (Smallest in Right Subtree)
+            root.key = temp.key              # Replace root's key with successor's key
+            root.right = delete(root.right, temp.key)   # Delete the successor node from right subtree
+    return root`
+        };
+
+        class BSTNode {
+            constructor(key) {
+                this.id = Math.random().toString(36).substr(2, 9);
+                this.key = key;
+                this.left = null;
+                this.right = null;
+            }
+        }
+
+        const BSTLab = () => {
+            const [tree, setTree] = useState(null);
+            const [activeTab, setActiveTab] = useState('node');
+            const [currentSnippet, setCurrentSnippet] = useState('node');
+            const [inputVal, setInputVal] = useState('');
+            const [logs, setLogs] = useState([]);
+            const [stack, setStack] = useState([]);
+            const [activeLine, setActiveLine] = useState(null);
+            const [highlightedNode, setHighlightedNode] = useState(null);
+            const [isRunning, setIsRunning] = useState(false);
+            const [speed, setSpeed] = useState(0.5);
+
+            const logRef = useRef(null);
+
+            const log = (msg) => setLogs(p => [...p, msg]);
+            const wait = (ms) => new Promise(res => setTimeout(res, ms / speed));
+
+            useEffect(() => {
+                logRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, [logs]);
+
+            useEffect(() => {
+                const root = new BSTNode(50);
+                root.left = new BSTNode(30);
+                root.right = new BSTNode(70);
+                root.left.left = new BSTNode(20);
+                root.left.right = new BSTNode(40);
+                root.right.right = new BSTNode(80);
+                setTree(root);
+                log("System initialized with default tree.");
+            }, []);
+
+            const resetVisuals = () => {
+                setHighlightedNode(null);
+                setStack([]);
+                setActiveLine(null);
+                setIsRunning(false);
+            };
+
+            const runSearch = async (target, type = "target") => {
+                if (isRunning || (!tree && type !== "target")) return;
+                setIsRunning(true);
+                setLogs([]);
+                setStack([]);
+
+                const t = parseInt(target);
+
+                const searchRecursive = async (node, level = 0) => {
+                    const callName = `search(${node ? node.key : "None"}, ${t})`;
+                    setStack(prev => [...prev, { name: callName, level }]);
+
+                    setActiveLine(1);
+                    await wait(800);
+
+                    if (!node) {
+                        setActiveLine(2);
+                        await wait(800);
+                        setActiveLine(3);
+                        log(`Base case: ${t} not found`);
+                        await wait(800);
+                        setStack(prev => prev.slice(0, -1));
+                        await wait(800);
+                        return null;
+                    }
+
+                    setHighlightedNode(node.id);
+                    await wait(800);
+
+
+                    if (node.key === t) {
+                        setActiveLine(4); await wait(800);
+                        setActiveLine(5);
+                        log(`Found ${t} at node ${node.key}`);
+                        await wait(800);
+                        setStack(prev => prev.slice(0, -1));
+                        await wait(800);
+                        return node;
+                    }
+
+                    setActiveLine(6);
+                    await wait(800);
+                    if (t < node.key) {
+                        log(`${t} < ${node.key} → go left`);
+                        setActiveLine(7);
+                        await wait(800);
+                        const result = await searchRecursive(node.left, level + 1);
+                        setStack(prev => prev.slice(0, -1));
+                        await wait(800);
+                        return result;
+                    } else {
+                        log(`${t} > ${node.key} → go right`);
+                        setActiveLine(8); await wait(800);
+                        setActiveLine(9);
+                        await wait(800);
+                        const result = await searchRecursive(node.right, level + 1);
+                        setStack(prev => prev.slice(0, -1));
+                        await wait(800);
+                        return result;
+                    }
+                };
+
+                if (type === "min") {
+                    let node = tree;
+                    let currentLevel = 0;
+                    setActiveLine(1);
+                    while (node) {
+                        setStack(prev => [...prev, { name: `findMin(${node.key})`, level: currentLevel }]);
+                        setHighlightedNode(node.id);
+                        setActiveLine(2);
+                        await wait(800);
+                        if (!node.left) {
+                            setActiveLine(3);
+                            log(`Minimum is ${node.key}`);
+                            await wait(800);
+                            break;
+                        }
+                        setActiveLine(4);
+                        log(`Go left from ${node.key}`);
+                        await wait(800);
+                        node = node.left;
+                        currentLevel++;
+                    }
+                    for (let i = 0; i <= currentLevel; i++) {
+                        setStack(prev => prev.slice(0, -1));
+                        await wait(800);
+                    }
+                } else if (type === "max") {
+                    let node = tree;
+                    let currentLevel = 0;
+                    setActiveLine(1);
+                    await wait(800);
+                    while (node) {
+                        setStack(prev => [...prev, { name: `findMax(${node.key})`, level: currentLevel }]);
+                        setHighlightedNode(node.id);
+                        setActiveLine(2);
+                        await wait(800);
+                        if (!node.right) {
+                            setActiveLine(3);
+                            log(`Maximum is ${node.key}`);
+                            await wait(800);
+                            break;
+                        }
+                        setActiveLine(4);
+                        log(`Go right from ${node.key}`);
+                        await wait(800);
+                        node = node.right;
+                        currentLevel++;
+                    }
+                    for (let i = 0; i <= currentLevel; i++) {
+                        setStack(prev => prev.slice(0, -1));
+                        await wait(800);
+                    }
+                } else {
+                    await searchRecursive(tree);
+                }
+                resetVisuals();
+            };
+
+            const runInsert = async (val) => {
+                if (isRunning) return;
+                setIsRunning(true);
+                setLogs([]);
+                setStack([]);
+                const key = parseInt(val);
+                if (isNaN(key)) { log("Invalid Number"); setIsRunning(false); return; }
+
+                const deepClone = (node) => {
+                    if (!node) return null;
+                    const n = new BSTNode(node.key);
+                    n.id = node.id;
+                    n.left = deepClone(node.left);
+                    n.right = deepClone(node.right);
+                    return n;
+                };
+
+                let newRoot = tree ? deepClone(tree) : null;
+
+                const insertRec = async (node, k, level = 0) => {
+                    const callName = `insert(${node ? node.key : "None"}, ${k})`;
+                    setStack(prev => [...prev, { name: callName, level }]);
+
+                    setActiveLine(1);
+                    await wait(800);
+
+                    if (!node) {
+                        setActiveLine(2);
+                        log(`Found empty spot. Inserting ${k}.`);
+                        await wait(800);
+                        const newNode = new BSTNode(k);
+                        setActiveLine(3);
+                        await wait(800);
+                        setActiveLine(4);
+                        await wait(800);
+                        return newNode;
+                    }
+
+                    setHighlightedNode(node.id);
+                    await wait(800);
+
+                    if (k < node.key) {
+                        setActiveLine(5);
+                        log(`${k} < ${node.key}. Recurse Left.`);
+                        await wait(800);
+                        node.left = await insertRec(node.left, k, level + 1);
+                        await wait(800);
+                        setStack(prev => prev.slice(0, -1));
+                    } else if (k > node.key) {
+                        setActiveLine(7);
+                        log(`${k} > ${node.key}. Recurse Right.`);
+                        await wait(800);
+                        node.right = await insertRec(node.right, k, level + 1);
+                        await wait(800);
+                        setStack(prev => prev.slice(0, -1));
+                    } else {
+                        log(`Key ${k} already exists.`);
+                    }
+
+                    setActiveLine(9);
+                    await wait(400);
+                    return node;
+                };
+
+                newRoot = await insertRec(newRoot, key);
+                setTree(newRoot);
+                await wait(2000);
+                setStack([]);
+                resetVisuals();
+                log(`Insertion of ${key} complete.`);
+            };
+
+            const runDelete = async (val) => {
+                if (isRunning || !tree) return;
+                setIsRunning(true);
+                setLogs([]);
+                setStack([]);
+                setCurrentSnippet('delete');
+
+                const key = parseInt(val);
+                let found = false;
+
+                const getMin = (n) => {
+                    while (n.left) n = n.left;
+                    return n;
+                };
+
+                const deepClone = (node) => {
+                    if (!node) return null;
+                    const n = new BSTNode(node.key);
+                    n.id = node.id;
+                    n.left = deepClone(node.left);
+                    n.right = deepClone(node.right);
+                    return n;
+                };
+
+                let rootCopy = deepClone(tree);
+
+                const deleteRec = async (node, k, level = 0) => {
+                    const callName = `delete(${node ? node.key : "None"}, ${k})`;
+                    setStack(prev => [...prev, { name: callName, level }]);
+
+                    setActiveLine(1);       // def delete
+                    await wait(500);
+
+                    if (!node) {
+                        setActiveLine(2); await wait(800);  // if root is None
+                        setActiveLine(3); await wait(800);  // return root
+                        if (!found) log(`Target ${k} not found.`);
+                        return null;
+                    }
+
+                    setHighlightedNode(node.id);
+                    await wait(500);
+
+                    if (k < node.key) {
+                        setActiveLine(4); log(`${k} < ${node.key} → go left`); await wait(800); // if key < root.key
+                        setActiveLine(5); await wait(800);                                                      // root.left = delete(...)
+                        node.left = await deleteRec(node.left, k, level + 1);
+                        await wait(800); 
+                        setStack(prev => prev.slice(0, -1));
+                    } else if (k > node.key) {
+                        setActiveLine(6); log(`${k} > ${node.key} → go right`); await wait(800);    // elif key > root.key
+                        setActiveLine(7); await wait(800);                                                      // root.right = delete(...)
+                        node.right = await deleteRec(node.right, k, level + 1);
+                        await wait(800); 
+                        setStack(prev => prev.slice(0, -1));
+                    } else {
+                        found = true;
+                        setActiveLine(8); log(`Found node ${k}`); await wait(800);                  // else: (พบโหนดที่จะลบ)
+                        if (!node.left && !node.right) {
+                            setActiveLine(10); await wait(800);                                     // if root.left is None and root.right is None:
+                            setActiveLine(11); await wait(800);                                     // return None
+                            return null;
+                        } else if (!node.left) {
+                            setActiveLine(13); await wait(800);                                     // elif root.left is None and root.right is not None:
+                            setActiveLine(14); await wait(800);                                     // return root.right
+                            return node.right;
+                        } else if (!node.right) {
+                            setActiveLine(15); await wait(800);                                     // elif root.right is None and root.left is not None:
+                            setActiveLine(16); await wait(800);                                     // return root.left                 
+                            return node.left;
+                        } else {
+                            setActiveLine(18); await wait(800);                                     
+                            setActiveLine(19);                                                      // temp = findMin(root.right)
+                            const temp = getMin(node.right);
+                            log(`Two children: Successor is ${temp.key}`); await wait(800);         
+                            setActiveLine(20);                                                      // root.key = temp.key
+                            node.key = temp.key; await wait(800);
+                            setActiveLine(21);                                                      // root.right = delete(root.right, temp.key)   
+                            node.right = await deleteRec(node.right, temp.key, level + 1);
+                            await wait(800); 
+                            setStack(prev => prev.slice(0, -1));
+                        }
+                    }
+                    setActiveLine(22); await wait(800);                                              // return root
+                    return node;
+                };
+
+                rootCopy = await deleteRec(rootCopy, key);
+                setTree(rootCopy);
+                await wait(1000);
+                setStack([]);
+                resetVisuals();
+            };
+
+            const TabButton = ({ id, label, icon }) => (
+                <button
+                    onClick={() => { setActiveTab(id); setCurrentSnippet(id); resetVisuals(); }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === id ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
+                >
+                    <Icon name={icon} /> {label}
+                </button>
+            );
+
+            const renderTree = (node, x, y, level) => {
+                if (!node) return null;
+                const spread = 25 / Math.pow(1.8, level);
+                const isHi = highlightedNode === node.id;
+
+                return (
+                    <g key={node.id}>
+                        {node.left && (
+                            <>
+                                <line x1={`${x}%`} y1={`${y}%`} x2={`${x - spread}%`} y2={`${y + 12}%`} stroke="#94a3b8" strokeWidth="2" />
+                                {renderTree(node.left, x - spread, y + 12, level + 1)}
+                            </>
+                        )}
+                        {node.right && (
+                            <>
+                                <line x1={`${x}%`} y1={`${y}%`} x2={`${x + spread}%`} y2={`${y + 12}%`} stroke="#94a3b8" strokeWidth="2" />
+                                {renderTree(node.right, x + spread, y + 12, level + 1)}
+                            </>
+                        )}
+                        <g className="transition-all duration-300">
+                            <circle cx={`${x}%`} cy={`${y}%`} r="18" fill={isHi ? "#fde047" : "#3b82f6"} stroke={isHi ? "#ca8a04" : "#1e40af"} strokeWidth={isHi ? 3 : 2} className="node-enter drop-shadow-md" />
+                            <text x={`${x}%`} y={`${y}%`} dy=".35em" textAnchor="middle" fill={isHi ? "#854d0e" : "white"} fontWeight="bold" fontSize="14" className="pointer-events-none">{node.key}</text>
+                        </g>
+                    </g>
+                );
+            };
+
+            return (
+                <div className="flex flex-col h-screen max-h-screen overflow-hidden">
+                    <header className="bg-white border-b border-slate-200 px-6 py-4 flex flex-wrap justify-between items-center gap-4 shrink-0 z-20 shadow-sm">
+                        <div>
+                            <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                Binary Search Tree Operations
+                            </h1>
+                            <p className="text-xs text-slate-500 font-medium">01526121 Data Structures and Algorithms</p>
+                            <p className="text-xs text-slate-500 mt-1">Generated by Gemini, Google. (16 February 2026)</p>
+                            <p className="text-xs text-slate-500 mt-1">Edited by Nutnicha Feuangfu and Jeena Kerdkaew, TA</p>
+                            <p className="text-xs text-slate-500 mt-1">Instructor: Dr. Sirasit Lochanachit, IT KMITL</p>
+                        </div>
+                        <div className="flex gap-2 bg-slate-100 p-1 rounded-lg">
+                            {['node', 'search', 'insert', 'delete'].map(t => (
+                                <TabButton key={t} id={t} label={t.charAt(0).toUpperCase() + t.slice(1)} icon={t === 'node' ? 'info' : t === 'search' ? 'search' : t === 'insert' ? 'plus' : 'trash'} />
+                            ))}
+                        </div>
+                    </header>
+
+                    <div className="flex-1 flex overflow-hidden">
+                        <div className="w-full md:w-[540px] bg-white border-r border-slate-200 flex flex-col z-10 shadow-lg shrink-0">
+                            <div className="p-4 border-b border-slate-100 bg-slate-50">
+                                {activeTab === 'node' && (
+                                    <div className="space-y-4">
+                                        <div className="bg-blue-50 border border-blue-200 p-6 rounded-lg text-sm text-blue-800">
+                                            <strong className="block mb-3 text-lg text-blue-900 border-b border-blue-200 pb-1">BST Fundamentals</strong>
+                                            <div className="mb-5">
+                                                <strong className="block mb-2 text-blue-900">Core Properties</strong>
+                                                <ul className="list-disc ml-4 space-y-1">
+                                                    <li><strong>Left Subtree:</strong> Keys &lt; Node's Key</li>
+                                                    <li><strong>Right Subtree:</strong> Keys &gt; Node's Key</li>
+                                                    <li><strong>No Duplicate Keys:</strong> Each key must be unique</li>
+                                                    <li><strong>Recursive Structure:</strong> Each subtree is itself a BST</li>
+                                                </ul>
+                                            </div>
+
+                                            <div>
+                                                <strong className="block mb-2 text-blue-900">Node Attributes</strong>
+                                                <ul className="list-disc ml-4 space-y-1">
+                                                    <li><strong>Key & Value:</strong> Identification and data payload</li>
+                                                    <li><strong>Left & Right:</strong> Pointers to child nodes</li>
+                                                    <li><strong>Parent (Optional):</strong> Pointer to the immediate ancestor</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <button onClick={() => setTree(null)} className="py-2 border border-slate-300 rounded text-sm font-bold text-slate-600 hover:bg-white">Clear Tree</button>
+                                            <button onClick={() => window.location.reload()} className="py-2 border border-slate-300 rounded text-sm font-bold text-slate-600 hover:bg-white flex items-center justify-center gap-2"><Icon name="refresh" size={14}/> Reset Default</button>
+                                        </div>
+                                    </div>
+                                )}
+                                {activeTab === 'search' && (
+                                    <div className="space-y-3">
+                                        <div className="flex gap-2">
+                                            <input type="number" value={inputVal} onChange={e => setInputVal(e.target.value)} placeholder="Key" className="flex-1 border rounded px-3 py-2 text-sm" />
+                                            <button onClick={() => { setCurrentSnippet("search"); runSearch(inputVal) }} disabled={isRunning} className="bg-indigo-600 text-white px-4 rounded text-sm font-bold hover:bg-indigo-700 disabled:opacity-50">Find</button>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <button onClick={() => { setCurrentSnippet("min"); runSearch(null, 'min') }} disabled={isRunning} className="border border-slate-300 rounded py-2 text-xs font-bold text-slate-600 hover:bg-white">Find Min</button>
+                                            <button onClick={() => { setCurrentSnippet("max"); runSearch(null, 'max') }} disabled={isRunning} className="border border-slate-300 rounded py-2 text-xs font-bold text-slate-600 hover:bg-white">Find Max</button>
+                                        </div>
+                                    </div>
+                                )}
+                                {activeTab === 'insert' && (
+                                    <div className="space-y-3">
+                                        <p className="text-xs text-slate-500">Insertions start at root and traverse down to find a valid empty spot.</p>
+                                        <div className="flex gap-2">
+                                            <input type="number" value={inputVal} onChange={e => setInputVal(e.target.value)} placeholder="New Key" className="flex-1 border rounded px-3 py-2 text-sm" />
+                                            <button onClick={() => runInsert(inputVal)} disabled={isRunning} className="bg-green-600 text-white px-4 rounded text-sm font-bold hover:bg-green-700 disabled:opacity-50">Insert</button>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button onClick={() => { setTree(null); setLogs(p=>[...p, "Tree Cleared."]); }} className="flex-1 border border-red-200 text-red-600 py-1.5 rounded text-xs hover:bg-red-50">Start from 0 (Clear)</button>
+                                            <button onClick={() => {
+                                                // Random insert
+                                                runInsert(Math.floor(Math.random() * 100));
+                                            }} disabled={isRunning} className="flex-1 border border-slate-300 text-slate-600 py-1.5 rounded text-xs hover:bg-white">Random +</button>
+                                        </div>
+                                    </div>
+                                )}
+                                {activeTab === 'delete' && (
+                                    <div className="space-y-3">
+                                        <div className="bg-orange-50 border border-orange-200 p-2 rounded text-xs text-orange-800 mb-2">
+                                            <strong>3 Cases:</strong> No Children, One Child, Two Children <br/>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <input type="number" value={inputVal} onChange={e => setInputVal(e.target.value)} placeholder="Key to Delete" className="flex-1 border rounded px-3 py-2 text-sm" />
+                                            <button onClick={() => runDelete(inputVal)} disabled={isRunning} className="bg-red-600 text-white px-4 rounded text-sm font-bold hover:bg-red-700 disabled:opacity-50">Delete</button>
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="mt-4 flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-200">
+                                    <span>Speed:</span>
+                                    <div className="flex gap-1">
+                                        {[0.5, 1, 2, 4].map(s => <button key={s} onClick={()=>setSpeed(s)} className={`px-2 py-0.5 rounded border ${speed===s ? 'bg-slate-700 text-white' : 'bg-white'}`}>{s}x</button>)}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex-1 overflow-hidden p-4 bg-slate-50">
+                                <div className="bg-slate-800 text-slate-300 p-4 rounded-lg overflow-x-auto shadow-inner h-full flex flex-col">
+                                    <div className="flex justify-between items-center mb-2 border-b border-slate-700 pb-2">
+                                        <span className="text-xs font-bold uppercase text-slate-500 flex items-center gap-2"><Icon name="code" size={14}/> Python</span>
+                                    </div>
+                                    <div className="code-container custom-scrollbar overflow-y-auto flex-1">
+                                        {SNIPPETS[currentSnippet].trim().split('\n').map((line, i) => (
+                                            <div key={i} className={`${activeLine === i + 1 ? 'highlight-line text-slate-900 font-bold' : 'text-slate-400'} px-2 py-0.5 whitespace-pre`}>
+                                                <span className="inline-block w-6 text-right mr-4 opacity-30 select-none text-xs">{i + 1}</span>{line}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="h-48 bg-slate-900 border-t border-slate-800 p-3 flex flex-col">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1"><Icon name="play" size={10}/> Recursion Stack (Level Visualization)</p>
+                                <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-1">
+                                    {stack.length === 0 ? <span className="text-slate-600 text-xs italic text-center mt-2">Stack Empty</span> :
+                                    stack.map((s, i) => (
+                                        <div key={i}
+                                            style={{ marginLeft: `${s.level * 16}px` }}
+                                            className="bg-indigo-600 text-white text-[11px] font-mono px-2 py-1 rounded shadow stack-enter border-l-4 border-indigo-300 flex justify-between items-center">
+                                            <span>{s.name}</span>
+                                            <span className="text-[9px] opacity-70">LVL {s.level}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 flex flex-col bg-slate-100 relative">
+                            <div className="flex-1 relative tree-bg overflow-hidden shadow-inner">
+                                {tree ? (
+                                    <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                                        <g transform="translate(0, 40)">{renderTree(tree, 50, 5, 0)}</g>
+                                    </svg>
+                                ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center text-slate-400 italic">Empty Tree</div>
+                                )}
+                            </div>
+                            <div className="h-32 bg-white border-t border-slate-200 flex flex-col shadow-inner z-20">
+                                <div className="px-4 py-2 bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">Operation Log</div>
+                                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar font-mono text-xs space-y-1">
+                                    {logs.map((l, i) => (
+                                        <div key={i} className="flex gap-2">
+                                            <span className="text-slate-400">{(i+1).toString().padStart(2, '0')}</span>
+                                            <span className={i === logs.length - 1 ? "text-indigo-600 font-bold" : "text-slate-600"}>{l}</span>
+                                        </div>
+                                    ))}
+                                    <div ref={logRef} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<BSTLab />);
+    </script>
+</body>
+</html>
