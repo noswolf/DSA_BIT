@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01526121 Data Structures: Graph</title>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+        }
+        .node-enter {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .node-exit {
+            animation: popOut 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+        }
+
+        button:disabled {
+            background-color: #bfc0c1;
+            color: black;
+        }
+
+        button:disabled:hover {
+            background-color: #bfc0c1 !important;
+            color: black !important;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes popOut {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        .list-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .list-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .list-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+    </style>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const GraphVisualizer = ({ 
+            nodes, 
+            edges, 
+            title = null,
+            highlightedNodeId = null, 
+            visitedNodes = new Set(),
+            visitedEdges = new Set(),
+            pending = [],
+            showWeights = false,
+            isDirected = false,
+            showPath = [],
+            width = null,
+            height = null
+            }) => {
+            return (
+                <div className={"relative " + ((width) ? `w-[${width}]`: "w-full") + ((height) ? ` h-[${height}]`: " h-[400px]") + " bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"}>
+                {
+                    title &&
+                    <div className="absolute top-4 left-4 z-10 flex gap-2">
+                        <div className="bg-slate-100 px-3 py-1 rounded-full border border-slate-200 flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tight">
+                            {title}
+                        </span>
+                        </div>
+                    </div>
+                }
+                    {/* SVG Canvas */}
+                <svg className="w-full h-full" viewBox="0 0 800 400">
+                    <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="20" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#cbd5e1" />
+                    </marker>
+                    <marker id="arrowhead-pending" markerWidth="10" markerHeight="7" refX="20" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#669bf2" />
+                    </marker>
+                    <marker id="arrowhead-highlight" markerWidth="10" markerHeight="7" refX="20" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#3b82f6" />
+                    </marker>
+                    <marker id="arrowhead-visited" markerWidth="10" markerHeight="7" refX="20" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#22c55e" />
+                    </marker>
+                    <marker id="arrowhead-notused-highlight" markerWidth="10" markerHeight="7" refX="20" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#ef4444"/>
+                    </marker>
+                    <marker id="arrowhead-notused" markerWidth="10" markerHeight="7" refX="20" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#fca5a5"/>
+                    </marker>
+                    </defs>
+
+                    {/* Render Edges */}
+                    {edges.map((edge, i) => {
+                    const u = nodes.find(n => n.id === edge.from);
+                    const v = nodes.find(n => n.id === edge.to);
+                    if (!u || !v) return null;
+
+                    const isHighlighted = highlightedNodeId === edge.from;
+                    const isPending = pending.some((id)=>{return id.id == edge.id});
+                    const isVisited = visitedEdges.has(edge.id) || showPath.some(e => e.id == edge.id);
+                    const isNotUsed = visitedNodes.has(edge.to);
+                    return (
+                        <g key={`edge-${i}`}>
+                        <line
+                            x1={u.x} y1={u.y} x2={v.x} y2={v.y}
+                            stroke={isHighlighted ? (isNotUsed?"#ef4444":"#3b82f6") : (isVisited ? "#22c55e" :(isPending ? (isNotUsed?"#fca5a5":"#669bf2"):"#cbd5e1"))}
+                            strokeWidth={isHighlighted ? "3" : "3"}
+                            className="transition-all duration-300"
+                            markerEnd={isDirected ? (isHighlighted? (isNotUsed?"url(#arrowhead-notused-highlight)":"url(#arrowhead-highlight)"): ( isVisited? "url(#arrowhead-visited)" :(isPending ? (isNotUsed?"url(#arrowhead-notused)":"url(#arrowhead-pending)"):"url(#arrowhead)"))) : "none"}
+                        />
+                        {showWeights && edge.weight && (
+                            <g>
+                            <rect 
+                                x={(u.x + v.x) / 2 - 10} y={(u.y + v.y) / 2 - 10} 
+                                width="20" height="20" rx="4" fill="white" 
+                            />
+                            <text
+                                x={(u.x + v.x) / 2} y={(u.y + v.y) / 2 + 4}
+                                textAnchor="middle"
+                                className="text-[10px] font-bold fill-slate-400"
+                            >
+                                {edge.weight}
+                            </text>
+                            </g>
+                        )}
+                        </g>
+                    );
+                    })}
+
+                    {/* Render Nodes */}
+                    {nodes.map((node) => {
+                    const isFocused = highlightedNodeId === node.id ;
+                    const isVisited = visitedNodes.has(node.id)  || showPath.some((edge) => edge.from == node.id) || showPath.some((edge) => edge.to == node.id);
+                    const isPending = pending.some((id)=>{return id.to ===  node.id});
+                    return (
+                        <g key={`node-${node.id}`} className="cursor-pointer">
+                        {/* Highlight Aura */}
+                        <circle
+                            cx={node.x} cy={node.y} r={isFocused ? "48" : "0"}
+                            className="fill-blue-100 transition-all duration-500 opacity-60"
+                        />
+                        {/* Main Node */}
+                        <circle
+                            cx={node.x} cy={node.y} r="40"
+                            className={`transition-all duration-300 stroke-2 ${
+                             (isFocused ? 'fill-blue-600 stroke-blue-800 shadow-lg' : ((isVisited) ? 'fill-green-400 stroke-green-600 shadow-lg': ((isPending) ?'fill-blue-200 stroke-slate-300' :'fill-white stroke-slate-300')))
+                            }`}
+                        />
+                        {/* Label */}
+                        <text
+                            x={node.x} y={node.y + 5}
+                            textAnchor="middle"
+                            className={`text-[18px] font-bold pointer-events-none transition-colors duration-300 ${
+                            isFocused ? 'fill-white' : 'fill-slate-600'
+                            }`}
+                        >
+                            {node.label || node.id}
+                        </text>
+                        </g>
+                    );
+                    })}
+                </svg>
+
+                </div>
+            );
+            };
+
+        const Icon = ({ name, size = 20, color = "currentColor", className="" }) => {
+            if (name === 'layers') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>;
+            if (name === 'users') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>;
+            if (name === 'compare') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="16 11 20 15 16 19"></polyline><path d="M4 5h7a4 4 0 0 1 4 4v10"></path><polyline points="8 13 4 9 8 5"></polyline><path d="M20 19h-7a4 4 0 0 1-4-4V5"></path></svg>;
+            if (name === 'terminal') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>;
+            if (name === 'book') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>;
+            if (name === 'clock') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
+            if (name === 'arrow-right') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
+            if (name === 'play') return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>;
+            return null;
+        };
+
+        const CodeBlock = ({ code, highlightLine = null }) => {
+            // Split code into an array of lines
+            const lines = code.trim().split('\n');
+
+            return (
+                <div className="bg-slate-900 rounded-xl border border-slate-800 shadow-2xl overflow-hidden font-mono text-sm leading-relaxed">
+                    {/* Terminal Header */}
+                    <div className="bg-slate-800/50 px-4 py-2 border-b border-slate-700 flex items-center gap-2">
+                        <div className="flex gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+                            <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
+                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
+                        </div>
+                    </div>
+
+                    {/* Code Content */}
+                    <div className="py-4 overflow-x-auto">
+                        {lines.map((line, index) => {
+                            const lineNumber = index + 1;
+                            const isHighlighted = lineNumber === highlightLine;
+
+                            return (
+                                <div 
+                                    key={index}
+                                    className={`flex transition-colors duration-200 ${
+                                        isHighlighted ? 'bg-blue-500/20 border-l-4 border-blue-500' : 'border-l-4 border-transparent'
+                                    }`}
+                                >
+                                    {/* Line Number */}
+                                    <span className={`w-12 text-right pr-4 select-none ${
+                                        isHighlighted ? 'text-blue-400 font-bold' : 'text-slate-600'
+                                    }`}>
+                                        {lineNumber}
+                                    </span>
+                                    
+                                    {/* Code Line */}
+                                    <pre className={`pr-4 ${isHighlighted ? 'text-blue-100' : 'text-slate-300'}`}>
+                                        {line || ' '}
+                                    </pre>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        };
+
+        const RenderGraphOverviewTab = () => (
+                <div className="space-y-6">
+                    {/* 2. Formal Mathematical Foundations */}
+                    <section>
+                        <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <Icon name="book-open" className="text-blue-600"/> What is a Graph?
+                        </h3>
+                        <p className="text-sm text-slate-600 mb-2">
+                            Graph is a set of objects, called <strong>nodes</strong> or vertices with a set of relationships that connect between them, called <strong>edges</strong>.
+                            A graph can be <strong>directed</strong> or <strong>undirected</strong> depend on if edges represent one or two-ways relationships.
+                            </p>
+                    </section>
+                    <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <GraphVisualizer 
+                            title="Undirected Graph"
+                            nodes={[
+                                    { id: 0, x: 100, y: 200, label: '1' },
+                                    { id: 1, x: 300, y: 100, label: '2' },
+                                    { id: 2, x: 300, y: 300, label: '3' },
+                                    { id: 3, x: 500, y: 100, label: '4' },
+                                    { id: 4, x: 500, y: 300, label: '5' }
+                                ]}
+                            edges={[
+                                { id: 0, from: 0, to: 1 },
+                                { id: 1, from: 0, to: 2 },
+                                { id: 2, from: 1, to: 3 },
+                                { id: 3, from: 2, to: 4 },
+                                { id: 4, from: 3, to: 4 },
+                                { id: 5, from: 4, to: 1 }
+                            ]}
+                            showWeights={false}
+                        />
+                        <GraphVisualizer 
+                        title="Directed Graph"
+                            nodes={[
+                                { id: 0, x: 100, y: 200, label: 'A' },
+                                { id: 1, x: 300, y: 100, label: 'B' },
+                                { id: 2, x: 300, y: 300, label: 'C' },
+                                { id: 3, x: 500, y: 200, label: 'D' },
+                                { id: 4, x: 700, y: 200, label: 'E' }
+                            ]}
+                            edges={[
+                                { id: 0, from: 0, to: 1, value: 10 },
+                                { id: 1, from: 0, to: 2, value: 2 },
+                                { id: 2, from: 1, to: 3, value: 2 },
+                                { id: 3, from: 2, to: 3, value: 3 },
+                                { id: 4, from: 3, to: 4, value: 5 }
+                            ]}
+                            showWeights={false}
+                            isDirected={true}
+                        />
+                    </section>
+                    <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <Icon name="book-open" className="text-blue-600"/> Graph Terminology 
+                    </h3>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        
+                        <div className="p-5 bg-slate-50 border border-slate-200 rounded-xl">
+                            <h4 className="text-sm font-bold text-slate-700 uppercase mb-3">Key Definitions</h4>
+                            <ul className="space-y-3 text-sm text-slate-600">
+                                <li>
+                                    <strong>Path:</strong> A sequence of vertices where each adjacent pair is connected by an edge.
+                                </li>
+                                <li>
+                                    <strong>Cycle:</strong> A path that starts and ends at the same vertex.
+                                </li>
+                            </ul>
+                        </div>
+                        <div className="p-5 bg-slate-50 border border-slate-200 rounded-xl">
+                            <h4 className="text-sm font-bold text-slate-700 uppercase mb-3">Graph Types</h4>
+                            <ul className="space-y-3 text-sm text-slate-600">
+                                <li>
+                                    <strong>Directed:</strong> A graph whose edges represents a one-way relationship
+                                </li>
+                                <li>
+                                    <strong>Undirected:</strong> A graph whose edges represents a two-ways relationship
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            );
+
+        const RenderDFSTab = () => {
+            const [current, setCurrent] = React.useState(null);
+            const [stack, setStack] = React.useState([]);
+            const [result, setResult] = React.useState([]);
+            const [visited, setVisited] = React.useState(new Set());
+            const [visitedEdge, setVisitedEdge] = React.useState(new Set());
+            const [isRunning, setIsRunning] = React.useState(false);
+            const [isAutoPlaying, setIsAutoPlaying] = React.useState(false);
+            const [playbackSpeed, setPlaybackSpeed] = React.useState(1250); // ms
+            const [currentLine, setCurrentLine] = React.useState(null);
+            const [stepIndex, setStepIndex] = React.useState(0);
+            let data = [];
+            const nodes = [
+                    { id: 0, x: 80,  y: 200, label: 'A' },
+                    { id: 1, x: 220, y: 80,  label: 'B' },
+                    { id: 2, x: 280, y: 320, label: 'C' },
+                    { id: 3, x: 450, y: 50,  label: 'D' },
+                    { id: 4, x: 380, y: 200, label: 'E' },
+                    { id: 5, x: 520, y: 350, label: 'F' },
+                    { id: 6, x: 650, y: 150, label: 'G' },
+                    { id: 7, x: 720, y: 300, label: 'H' }
+            ];
+
+            const edges = [
+                    {id:0, from: 0, to: 1 },
+                    {id:1, from: 0, to: 2 },
+                    {id:2, from: 1, to: 3 },
+                    {id:3, from: 1, to: 4 },
+                    {id:4, from: 2, to: 4 },
+                    {id:5, from: 2, to: 5 },
+                    {id:6, from: 4, to: 6 },
+                    {id:7, from: 3, to: 6 },
+                    {id:8, from: 5, to: 7 },
+                    {id:9, from: 6, to: 7 }
+            ];
+
+            const code = `
+def DFS(start_node):
+  visited = set()
+  result = []
+  stack = Stack()
+  
+  stack.push(start_node)
+  
+  while not stack.is_empty():
+    node = stack.pop()
+    
+    if node not in visited:
+      visited.add(node)
+      result.append(node.name)
+      
+      neighbors = sorted(node.neighbors)
+      for neighbor in neighbors:
+        if neighbor not in visited:
+          stack.push(neighbor)
+          
+  return result`
+
+            // Automatic Player Loop
+            React.useEffect(() => {
+                let interval;
+                if (isAutoPlaying && isRunning && stack.length >= 0) {
+                    interval = setInterval(() => {
+                        performStep();
+                    }, 2300 - playbackSpeed);
+                } else if (stack.length === 0) {
+                    setIsAutoPlaying(false);
+                }
+                return () => clearInterval(interval);
+            }, [isAutoPlaying, isRunning, stack, playbackSpeed]);
+
+            const startDFS = () => {
+                setStack([{id: -1, from: -1, to: 0}]); 
+                setVisited(new Set());
+                setVisitedEdge(new Set());
+                setCurrent(null);
+                setIsRunning(true);
+                setIsAutoPlaying(false);
+            };
+
+            const resetDFS = () => {
+                setStack([]); 
+                setVisited(new Set());
+                setVisitedEdge(new Set());
+                setCurrent(null);
+                setIsRunning(false);
+                setIsAutoPlaying(false);
+            };
+
+            const performStep = () => {
+                if (stack.length === 0) {
+                    setIsRunning(false);
+                    setIsAutoPlaying(false);
+                    setCurrent(null);
+                    return;
+                }
+
+                const nextStack = [...stack];
+                const edge = nextStack.pop();
+                setStack(nextStack);
+
+                const id = edge.to;
+                const edgeId = edge.id;
+
+                if (!visited.has(id)) {
+                    const nextVisited = new Set(visited);
+                    const nextVisitedEdge = new Set(visitedEdge);
+                    nextVisited.add(id);
+                    setVisited(nextVisited);
+                    if (edgeId !== undefined) nextVisitedEdge.add(edgeId);
+                    
+                    const neighbors = edges
+                        .filter(e => e.from === id)
+                        .filter(n => !nextVisited.has(n.to))
+                        .toSorted((a, b) => a.to - b.to)
+                        .toReversed();
+                    setCurrent(id);
+                    
+                    setVisitedEdge(nextVisitedEdge);
+                    setStack([...nextStack, ...neighbors]);
+                }
+            };
+
+            return (
+                <div className="space-y-6">
+                    <section className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <Icon name="play-circle" className="text-orange-500"/> DFS
+                                </h3>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                                {/* Speed Slider */}
+                                <div className="flex flex-col items-center gap-1">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase">Speed</span>
+                                    <input 
+                                        type="range" min="500" max="2000" step="200" value={playbackSpeed}
+                                        onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
+                                        className="w-24 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                                    />
+                                </div>
+
+                                <div className="flex gap-2">
+                                    <button onClick={resetDFS} className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-slate-700 transition-colors">
+                                        Reset
+                                    </button>
+                                    
+                                    
+                                        <button 
+                                            onClick={() => {if (!isRunning) {startDFS()}; setIsAutoPlaying(!isAutoPlaying)} }
+                                            className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${
+                                                isAutoPlaying ? "bg-red-100 text-red-600 border border-red-200" : "bg-green-600 text-white"
+                                            }`}
+                                        >
+                                            <Icon name={isAutoPlaying ? "pause" : "play"} size={16}/>
+                                            {isAutoPlaying ? "Stop" : "Auto-Play"}
+                                        </button>
+                                    
+                                    <button onClick={ () => {if (!isRunning) {startDFS()};performStep();}} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold" disabled={isAutoPlaying}>
+                                            Step
+                                    </button>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div className="flex flex-col lg:flex-row gap-6">
+                        <div className="flex-1 bg-white rounded-xl border border-slate-200 overflow-hidden relative">
+                            <GraphVisualizer 
+                                nodes={nodes}
+                                edges={edges}
+                                highlightedNodeId={current}
+                                visitedNodes={visited}
+                                visitedEdges={visitedEdge}
+                                pending={stack}
+                                isDirected={true}
+                            />
+                        </div>
+                        <div className="w-full lg:w-72 h-full bg-white rounded-xl border border-slate-200 overflow-hidden relative">
+                            <table className="w-full border-collapse">
+                                <thead>
+                                    <tr className="h-12">
+                                        <th className="w-1/2 border-b">Node</th>
+                                        <th className="w-1/2 border-b">Visited</th>
+                                    </tr>
+                                </thead>
+                                    <tbody>
+                                    {
+                                        nodes.map((node) => {
+                                            return <tr key={node.id} className="h-11">
+                                                <td className="text-center">{node.label}</td>
+                                                <td className="text-center">{visited.has(node.id) ? "✔️" : "❌"}</td>
+                                            </tr>
+                                        })
+                                    }
+                                    </tbody>
+                                </table>
+                        </div>
+                        <div className="p-5 w-full lg:w-64 bg-slate-900 rounded-xl text-white shadow-xl">
+                            <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 tracking-widest">Stack State</h4>
+                            <div className="flex flex-col-reverse gap-2 max-h-[300px]">
+                                {stack.map((edge, i) => {
+                                    const node = nodes.find(n => n.id === edge.to);
+                                    return (
+                                        <div key={i} className={`p-2 rounded text-center text-xs font-mono transition-all duration-300 ${
+                                            i === stack.length - 1 ? "bg-blue-500 border-orange-400 text-white scale-105 shadow-lg" : "bg-slate-800 border border-slate-700 text-slate-300"
+                                        }`}>
+                                            {i === stack.length - 1 && <span className="block text-[8px] uppercase opacity-80 mb-1">Next Up</span>}
+                                            Node {node?.label}
+                                        </div>
+                                    );
+                                })}
+                                {stack.length === 0 && <span className="text-slate-600 text-xs italic text-center py-4">Stack Empty</span>}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                        <h4 className="text-xs font-bold text-blue-800 uppercase mb-2">Traversed Sequence</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {Array.from(visited).map((id, index) => (
+                                <React.Fragment key={id}>
+                                    <span className="px-3 py-1 bg-white border border-blue-200 text-blue-700 rounded-md text-xs font-bold shadow-sm">
+                                        {nodes.find(n => n.id === id)?.label}
+                                    </span>
+                                    {index < visited.size - 1 && <span className="text-blue-300 self-center">→</span>}
+                                </React.Fragment>
+                            ))}
+                        </div>
+                    </div>
+                    <div>
+                        <h2 className="text-xl text-slate-800 my-4 font-bold">Psuedocode</h2>
+                        <CodeBlock code={code} highlightLine={currentLine}/>
+                    </div>
+                </div>
+            );
+        };
+
+        const RenderBFSTab = () => {
+            const [current, setCurrent] = React.useState(null);
+            const [stack, setStack] = React.useState([]);
+            const [result, setResult] = React.useState([]);
+            const [visited, setVisited] = React.useState(new Set());
+            const [visitedEdge, setVisitedEdge] = React.useState(new Set());
+            const [isRunning, setIsRunning] = React.useState(false);
+            const [isAutoPlaying, setIsAutoPlaying] = React.useState(false);
+            const [playbackSpeed, setPlaybackSpeed] = React.useState(1250); // ms
+            const [currentLine, setCurrentLine] = React.useState(null);
+            const [stepIndex, setStepIndex] = React.useState(0);
+            let data = [];
+            const nodes = [
+                    { id: 0, x: 80,  y: 200, label: 'A' },
+                    { id: 1, x: 220, y: 80,  label: 'B' },
+                    { id: 2, x: 280, y: 320, label: 'C' },
+                    { id: 3, x: 450, y: 50,  label: 'D' },
+                    { id: 4, x: 380, y: 200, label: 'E' },
+                    { id: 5, x: 520, y: 350, label: 'F' },
+                    { id: 6, x: 650, y: 150, label: 'G' },
+                    { id: 7, x: 720, y: 300, label: 'H' }
+            ];
+
+            const edges = [
+                    {id:0, from: 0, to: 1 },
+                    {id:1, from: 0, to: 2 },
+                    {id:2, from: 1, to: 3 },
+                    {id:3, from: 1, to: 4 },
+                    {id:4, from: 2, to: 4 },
+                    {id:5, from: 2, to: 5 },
+                    {id:6, from: 4, to: 6 },
+                    {id:7, from: 3, to: 6 },
+                    {id:8, from: 5, to: 7 },
+                    {id:9, from: 6, to: 7 }
+            ];
+
+            const code = `
+def BFS(start_node):
+  visited = set()
+  queue = Queue()
+  result = []
+
+  visited.add(start_node)
+  for neighbor_node in sorted(start_node.neighbor_node):
+      if neighbor_node not in visited:
+          queue.add(neighbor_node)
+    
+  while not queue.is_empty():
+      child = queue.dequeue()
+      if child not in visited:
+          visited.add(child)
+          result.add(child)
+
+          for neighbor_node in sorted(child.neighbor_node):
+              if neighbor_node not in visited:
+                  queue.add(neighbor_node)
+
+  return result`
+
+            // Automatic Player Loop
+            React.useEffect(() => {
+                let interval;
+                if (isAutoPlaying && isRunning && stack.length >= 0) {
+                    interval = setInterval(() => {
+                        performStep();
+                    }, 2300 - playbackSpeed);
+                } else if (stack.length === 0) {
+                    setIsAutoPlaying(false);
+                }
+                return () => clearInterval(interval);
+            }, [isAutoPlaying, isRunning, stack, playbackSpeed]);
+
+            const startBFS = () => {
+                setStack([{id: -1, from: -1, to: 0}]); 
+                setVisited(new Set());
+                setVisitedEdge(new Set());
+                setCurrent(null);
+                setIsRunning(true);
+                setIsAutoPlaying(false);
+            };
+
+            const resetBFS = () => {
+                setStack([]); 
+                setVisited(new Set());
+                setVisitedEdge(new Set());
+                setCurrent(null);
+                setIsRunning(false);
+                setIsAutoPlaying(false);
+            };
+
+            const performStep = () => {
+                if (stack.length === 0) {
+                    setIsRunning(false);
+                    setIsAutoPlaying(false);
+                    setCurrent(null);
+                    return;
+                }
+
+                const nextStack = [...stack];
+                const edge = nextStack.shift();
+                setStack(nextStack);
+
+                const id = edge.to;
+                const edgeId = edge.id;
+
+                if (!visited.has(id)) {
+                    const nextVisited = new Set(visited);
+                    const nextVisitedEdge = new Set(visitedEdge);
+                    nextVisited.add(id);
+                    setVisited(nextVisited);
+                    if (edgeId !== undefined) nextVisitedEdge.add(edgeId);
+                    
+                    const neighbors = edges
+                        .filter(e => e.from === id)
+                        .filter(n => !nextVisited.has(n.to))
+                        .toSorted((a, b) => a.to - b.to);
+                    setCurrent(id);
+                    
+                    setVisitedEdge(nextVisitedEdge);
+                    setStack([...nextStack, ...neighbors]);
+                }
+            };
+
+            return (
+                <div className="space-y-6">
+                    <section className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <Icon name="play-circle" className="text-orange-500"/> BFS
+                                </h3>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                                {/* Speed Slider */}
+                                <div className="flex flex-col items-center gap-1">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase">Speed</span>
+                                    <input 
+                                        type="range" min="500" max="2000" step="200" value={playbackSpeed}
+                                        onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
+                                        className="w-24 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                                    />
+                                </div>
+
+                                <div className="flex gap-2">
+                                    <button onClick={resetBFS} className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-slate-700 transition-colors">
+                                        Reset
+                                    </button>
+                                    
+                                    
+                                        <button 
+                                            onClick={() => {if (!isRunning) {startBFS()}; setIsAutoPlaying(!isAutoPlaying)} }
+                                            className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${
+                                                isAutoPlaying ? "bg-red-100 text-red-600 border border-red-200" : "bg-green-600 text-white"
+                                            }`}
+                                        >
+                                            <Icon name={isAutoPlaying ? "pause" : "play"} size={16}/>
+                                            {isAutoPlaying ? "Stop" : "Auto-Play"}
+                                        </button>
+                                    
+                                    <button onClick={ () => {if (!isRunning) {startBFS()};performStep();}} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold" disabled={isAutoPlaying}>
+                                            Step
+                                    </button>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div className="flex flex-col lg:flex-row gap-6">
+                        <div className="flex-1 bg-white rounded-xl border border-slate-200 overflow-hidden relative">
+                            <GraphVisualizer 
+                                nodes={nodes}
+                                edges={edges}
+                                highlightedNodeId={current}
+                                visitedNodes={visited}
+                                visitedEdges={visitedEdge}
+                                pending={stack}
+                                isDirected={true}
+                            />
+                        </div>
+                        <div className="w-full lg:w-72 h-full bg-white rounded-xl border border-slate-200 overflow-hidden relative">
+                            <table className="w-full border-collapse">
+                                <thead>
+                                    <tr className="h-12">
+                                        <th className="w-1/2 border-b">Node</th>
+                                        <th className="w-1/2 border-b">Visited</th>
+                                    </tr>
+                                </thead>
+                                    <tbody>
+                                    {
+                                        nodes.map((node) => {
+                                            return <tr key={node.id} className="h-11">
+                                                <td className="text-center">{node.label}</td>
+                                                <td className="text-center">{visited.has(node.id) ? "✔️" : "❌"}</td>
+                                            </tr>
+                                        })
+                                    }
+                                    </tbody>
+                                </table>
+                        </div>
+
+                        <div className="p-5 w-full lg:w-64 bg-slate-900 rounded-xl text-white shadow-xl">
+                            <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 tracking-widest">Queue State</h4>
+                            <div className="flex flex-col-reverse gap-2 max-h-[300px]">
+                                {stack.toReversed().map((edge, i) => {
+                                    const node = nodes.find(n => n.id === edge.to);
+                                    return (
+                                        <div key={i} className={`p-2 rounded text-center text-xs font-mono transition-all duration-300 ${
+                                            i === stack.length - 1 ? "bg-blue-500 border-orange-400 text-white scale-105 shadow-lg" : "bg-slate-800 border border-slate-700 text-slate-300"
+                                        }`}>
+                                            {i === stack.length - 1 && <span className="block text-[8px] uppercase opacity-80 mb-1">Next Up</span>}
+                                            Node {node?.label}
+                                        </div>
+                                    );
+                                })}
+                                {stack.length === 0 && <span className="text-slate-600 text-xs italic text-center py-4">Stack Empty</span>}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                        <h4 className="text-xs font-bold text-blue-800 uppercase mb-2">Traversed Sequence</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {Array.from(visited).map((id, index) => (
+                                <React.Fragment key={id}>
+                                    <span className="px-3 py-1 bg-white border border-blue-200 text-blue-700 rounded-md text-xs font-bold shadow-sm">
+                                        {nodes.find(n => n.id === id)?.label}
+                                    </span>
+                                    {index < visited.size - 1 && <span className="text-blue-300 self-center">→</span>}
+                                </React.Fragment>
+                            ))}
+                        </div>
+                        
+                    </div>
+                    <div>
+                        <h2 className="text-xl text-slate-800 my-4 font-bold">Psuedocode</h2>
+                        <CodeBlock code={code} highlightLine={currentLine}/>
+                    </div>
+                </div>
+            );
+        };
+
+        const RenderDijkstraTab = () => {
+            const [current, setCurrent] = React.useState(null);
+            const [stack, setStack] = React.useState([]);
+            const [path, setPath] = React.useState([]);
+            const [result, setResult] = React.useState([]);
+            const [distances, setDistances] = React.useState({});
+            const [previous, setPrevious] = React.useState({});
+            const [visited, setVisited] = React.useState(new Set());
+            const [visitedEdge, setVisitedEdge] = React.useState(new Set());
+            const [isFinished, setIsFinished] = React.useState(false);
+            const [isRunning, setIsRunning] = React.useState(false);
+            const [isAutoPlaying, setIsAutoPlaying] = React.useState(false);
+            const [playbackSpeed, setPlaybackSpeed] = React.useState(1250); // ms
+            const [currentLine, setCurrentLine] = React.useState(null);
+            const [stepIndex, setStepIndex] = React.useState(0);
+            const inputRef = useRef(null);
+            let data = [];
+            const nodes = [
+                    { id: 0, x: 80,  y: 200, label: 'A' },
+                    { id: 1, x: 220, y: 80,  label: 'B' },
+                    { id: 2, x: 280, y: 320, label: 'C' },
+                    { id: 3, x: 450, y: 50,  label: 'D' },
+                    { id: 4, x: 380, y: 200, label: 'E' },
+                    { id: 5, x: 520, y: 350, label: 'F' },
+                    { id: 6, x: 650, y: 150, label: 'G' },
+                    { id: 7, x: 720, y: 300, label: 'H' }
+            ];
+
+            const Labels = {
+                    0:'A',
+                    1:'B',
+                    2:'C',
+                    3:'D',
+                    4:'E',
+                    5:'F',
+                    6:'G',
+                    7:'H'
+            };
+
+            const edges = [
+                    {id:0, from: 0, to: 1, weight: 2 },
+                    {id:1, from: 0, to: 2, weight: 4 },
+                    {id:2, from: 1, to: 3, weight: 1 },
+                    {id:3, from: 1, to: 4, weight: 3 },
+                    {id:4, from: 2, to: 4, weight: 1 },
+                    {id:5, from: 2, to: 5, weight: 3 },
+                    {id:6, from: 4, to: 6, weight: 5 },
+                    {id:7, from: 3, to: 6, weight: 8 },
+                    {id:8, from: 5, to: 7, weight: 7 },
+                    {id:9, from: 6, to: 7, weight: 4 }
+            ];
+
+            const code = `
+def djikstra(start_node, all_nodes):
+  distance = {node: float('infinity') for node in all_nodes}
+  distance[start_node] = 0
+  pq = PriorityQueue()
+  pq.enqueue(start_node, 0)
+  previous = {node: None for node in all_nodes}
+
+  while not pq.is_empty():
+      current_node = pq.dequeue()
+      current_distance = distance[current_node]
+
+      for neighbor, weight in current_node.neighbor:
+          distance = current_distance + weight
+          if distance < distance[neighbor]:
+              distance[neighbor] = distance
+              previous[neighbor] = current_node
+              pq.enqueue(neighbor, distance)
+
+  return distance, previous`
+            // Automatic Player Loop
+            React.useEffect(() => {
+                let interval;
+                if (isAutoPlaying && isRunning && stack.length >= 0) {
+                    interval = setInterval(() => {
+                        performStep();
+                    }, 2300 - playbackSpeed);
+                } else if (stack.length === 0) {
+                    setIsAutoPlaying(false);
+                }
+                return () => clearInterval(interval);
+            }, [isAutoPlaying, isRunning, stack, playbackSpeed]);
+
+            const startDijkstra = () => {
+                
+                setStack([{id: -1, from: -1, to: 0, dist: 0}]);
+                setPath([])
+                setResult([])
+                let dist = {}
+                nodes.forEach((n) => {
+                    dist[n.id] = Infinity
+                })
+                dist[0] = 0;
+                setDistances(dist)
+                let prev = {}
+                nodes.forEach((n) => {
+                    prev[n.id] = null
+                })
+                setPrevious(prev);
+                setVisited(new Set());
+                setVisitedEdge(new Set());
+                setCurrent(null);
+                setIsFinished(false);
+                setIsRunning(true);
+                setIsAutoPlaying(false);
+            };
+
+            const resetDijkstra = () => {
+                setStack([]);
+                setResult([])
+                setPath([])
+                setDistances({});
+                setPrevious({});
+                setVisited(new Set());
+                setVisitedEdge(new Set());
+                setCurrent(null);
+                setIsFinished(false);
+                setIsRunning(false);
+                setIsAutoPlaying(false);
+            };
+
+            const performStep = () => {
+                if (stack.length === 0) {
+                    setIsRunning(false);
+                    setIsAutoPlaying(false);
+                    setIsFinished(visited.size === nodes.length);
+                    setCurrent(null);
+                    return;
+                }
+
+                let nextStack = [...stack];
+                const edge = nextStack.pop();
+                setStack(nextStack);
+
+                const id = edge.to;
+                const edgeId = edge.id;
+
+                if (!visited.has(id)) {
+                    const nextVisited = new Set(visited);
+                    const nextVisitedEdge = new Set(visitedEdge);
+                    const currentDist = distances[id];
+                    setResult((res) => [...res, edge]);
+                    nextVisited.add(id);
+                    setCurrent(id);
+                    setVisited(nextVisited);
+                    nextVisitedEdge.add(edgeId);
+                    setVisitedEdge(nextVisitedEdge);
+                    let nextDistances = new Object(distances);
+                    let nextPrevious = new Object(previous);
+                    const neighbors = edges
+                        .filter(e => e.from === id)
+                        .forEach(e => {
+                            if (currentDist + e.weight < distances[e.to]) {
+                                nextDistances[e.to] = currentDist + e.weight;
+                                nextPrevious[e.to] = id;
+                                nextStack.push({...e, dist: distances[e.to]});
+                            }
+                        });
+                    setDistances(nextDistances);
+                    setPrevious(nextPrevious);
+                    nextStack.sort((a, b)=> b.dist - a.dist);
+                    setStack(nextStack);
+                }
+            };
+
+            const getPath = (source, destination) => {
+                if (!isFinished){
+                    return
+                }
+                
+                let current = destination;
+                let edge = []
+                while (current != source) {
+                    edge.push(edges.find((e)=>(e.from == previous[current] && e.to == current)));
+                    current = previous[current]
+                }
+                
+                edge.reverse();
+                setVisited(new Set());
+                setVisitedEdge(new Set());
+                setPath(edge);
+            }
+
+            return (
+                <div className="space-y-6">
+                    <section className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <Icon name="play-circle" className="text-orange-500"/> Dijkstra
+                                </h3>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                                {/* Speed Slider */}
+                                <div className="flex flex-col items-center gap-1">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase">Speed</span>
+                                    <input 
+                                        type="range" min="500" max="2000" step="200" value={playbackSpeed}
+                                        onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
+                                        className="w-24 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                                    />
+                                </div>
+
+                                <div className="flex gap-2">
+                                    <button onClick={resetDijkstra} className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-slate-700 transition-colors">
+                                        Reset
+                                    </button>
+                                    
+                                    
+                                        <button 
+                                            onClick={() => {if (!isRunning) {startDijkstra()}; setIsAutoPlaying(!isAutoPlaying)} }
+                                            className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${
+                                                isAutoPlaying ? "bg-red-100 text-red-600 border border-red-200" : "bg-green-600 text-white"
+                                            }`}
+                                        >
+                                            <Icon name={isAutoPlaying ? "pause" : "play"} size={16}/>
+                                            {isAutoPlaying ? "Stop" : "Auto-Play"}
+                                        </button>
+                                    
+                                    <button onClick={ () => {if (!isRunning) {startDijkstra()}; performStep();}} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold" disabled={isAutoPlaying}>
+                                            Step
+                                    </button>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div className="flex flex-col lg:flex-row gap-6">
+                        <div className="flex-1 bg-white rounded-xl border border-slate-200 overflow-hidden relative">
+                            <GraphVisualizer 
+                                nodes={nodes}
+                                edges={edges}
+                                highlightedNodeId={current}
+                                visitedNodes={visited}
+                                visitedEdges={visitedEdge}
+                                pending={stack}
+                                isDirected={true}
+                                showWeights={true}
+                                showPath={path}
+                            />
+                        </div>
+                        <div className="w-full lg:w-72  h-full bg-white rounded-xl border border-slate-200 overflow-hidden relative">
+                            <table className="w-full border-collapse">
+                                <thead>
+                                    <tr className="h-12">
+                                        <th className="w-1/4 border-b">Node</th>
+                                        <th className="w-1/4 border-x border-b">Distance</th>
+                                        <th className="w-1/4 border-b">Previous</th>
+                                        <th className="w-1/4 border-b">Visited</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {
+                                    nodes.map((node) => {
+                                        return <tr key={node.id} className="h-11">
+                                            <td className="text-center">{node.label}</td>
+                                            <td className="text-center border-x">{distances[node.id] || distances[node.id] == 0 ? distances[node.id] : "?"}</td>
+                                            <td className="text-center border-x">{previous[node.id] != null ? Labels[previous[node.id]] : "?"}</td>
+                                            <td className="text-center">{visited.has(node.id) ? "✔️" : "❌"}</td>
+                                        </tr>
+                                    })
+                                }
+                                </tbody>
+                                </table>
+                        </div>
+                        <div className="p-5 w-full lg:w-64 bg-slate-900 rounded-xl text-white shadow-xl">
+                            <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 tracking-widest">Priority Queue State</h4>
+                            <div className="flex flex-col-reverse gap-2 max-h-[300px]">
+                                {stack.map((edge, i) => {
+                                    return (
+                                        <div key={i} className={`p-2 rounded text-center text-xs font-mono transition-all duration-300 ${
+                                            i === stack.length - 1 ? "bg-blue-500 border-orange-400 text-white scale-105 shadow-lg" : "bg-slate-800 border border-slate-700 text-slate-300"
+                                        }`}>
+                                            {i === stack.length - 1 && <span className="block text-[8px] uppercase opacity-80 mb-1">Next Up</span>}
+                                            Node {Labels[edge.to]}  {edge.dist}
+                                        </div>
+                                    );
+                                })}
+                                {stack.length === 0 && <span className="text-slate-600 text-xs italic text-center py-4">Stack Empty</span>}
+                            </div>
+                        </div>
+                    </div>
+
+                    <section className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <Icon name="play-circle" className="text-orange-500"/> Shortest Path from A to <input ref={inputRef} type="text" className="rounded-md border border-slate-300 h-8 p-2" size="1" minLength="1" maxLength="1"/>
+                                </h3>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                                <div className="flex gap-2">
+                                    <button onClick={ () => {if (isFinished && "ABCDEFGH".includes(inputRef.current.value)) {getPath(0,"ABCDEFGH".indexOf(inputRef.current.value))}}} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold" disabled={!isFinished}>
+                                        {isFinished? "Find" : "Complete Simulation First"}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <div>
+                        <h2 className="text-xl text-slate-800 my-4 font-bold">Psuedocode</h2>
+                        <CodeBlock code={code} highlightLine={currentLine}/>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('Graph Overview');
+            const [removingIndex, setRemovingIndex] = useState(null);
+            const content = useRef(null);
+
+            useEffect(() => {
+                if (window.MathJax) {
+                    window.MathJax.typeset();
+                }
+            }, [activeTab]);
+
+            useEffect(() => {
+                if (content.current) {
+                    content.current.scrollTop = 0;
+                }
+            }, [activeTab]);
+
+            return (
+                <div className="flex h-screen overflow-hidden">
+                    <div className="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl z-10">
+                        <div className="p-6 border-b border-slate-800">
+                            <h1 className="text-xl font-bold text-white tracking-tight">Graph</h1>
+                            <p className="text-xs text-slate-500 mt-1">01526121 Data Structures and Algorithms</p>
+                            <p className="text-xs text-slate-500 mt-1">Generated by Gemini, Google. (21 February 2026)</p>
+                            <p className="text-xs text-slate-500 mt-1">Edited by Wissanupong Chanliem and Boonsita Jongklom, TA</p>
+                        </div>
+                        <nav className="flex-1 p-4 space-y-2">
+                            {[
+                                { id: 'Graph Overview', label: 'Graph Overview', icon: 'layers' },
+                                { id: 'Algorithm: DFS', label: 'Algorithm: DFS', icon: 'layers' },
+                                { id: 'Algorithm: BFS', label: 'Algorithm: BFS', icon: 'layers' },
+                                { id: 'Algorithm: Dijkstra', label: 'Algorithm: Dijkstra', icon: 'layers' }
+                            ].map(item => (
+                                <button key={item.id} onClick={() => setActiveTab(item.id)}
+                                    className={`w-full text-left px-4 py-3 rounded transition-colors flex items-center gap-3 ${activeTab === item.id ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}>
+                                    <Icon name={item.icon} size={18} /> {item.label}
+                                </button>
+                            ))}
+                        </nav>
+                    </div>
+
+                    <div className="flex-1 flex flex-col relative h-screen">
+                        <header className="bg-white border-b border-slate-200 p-6 flex justify-between items-center">
+                            <h2 className="text-2xl font-bold text-slate-800 capitalize">{activeTab}</h2>
+                        </header>
+                        <div className={`flex flex-col h-full  relative`}>
+
+                            <div className="h-full overflow-y-auto bg-white border border-t border-slate-200 flex flex-col md:flex-row overflow-hidden" style={{maxHeight:"calc(100vh - 81px)"}}>
+                                <div className="flex-1 p-6 overflow-y-auto border-r border-slate-100 " style={{maxHeight:"calc(100vh - 81px)"}} ref={content}>
+                                    {activeTab === 'Graph Overview' && <RenderGraphOverviewTab/>}
+                                    {activeTab === 'Algorithm: DFS' && <RenderDFSTab/>}
+                                    {activeTab === 'Algorithm: BFS' && <RenderBFSTab/>}
+                                    {activeTab === 'Algorithm: Dijkstra' && <RenderDijkstraTab/>}
+                                </div>
+                            
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
