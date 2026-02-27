@@ -3,9 +3,9 @@
 This repo consists of teaching materials (lectures and code examples) for BIT, IT KMITL.
 
 ## Interactive Guides
-
-[Tree Traversals](https://noswolf.github.io/DSA_BIT/Week11/Tree_traversals.html)
-[Binary Search Tree Operations](https://noswolf.github.io/DSA_BIT/Week12/BST_operations.html)
+[Sorting Algorithms](https://noswolf.github.io/DSA_BIT/Week7/Sorting_Interactive_Guide.html) <br>
+[Tree Traversals](https://noswolf.github.io/DSA_BIT/Week11/Tree_traversals.html) <br>
+[Binary Search Tree Operations](https://noswolf.github.io/DSA_BIT/Week12/BST_operations.html) <br>
 [Graph Algorithms](https://noswolf.github.io/DSA_BIT/Week13/Graph_Algorithms.html)
 
 ## Course Outlines
